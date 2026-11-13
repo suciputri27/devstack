@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+set -uo pipefail
+cfg="${OMP_CONFIG_DIR:-$HOME/omp-config}"
+
+usage() {
+  cat <<'USAGE'
+ai-init: siapkan proyek untuk agent devstack (aman diulang)
+
+  ai-init               hook, folder .ai, template AGENTS.md dan WATCHDOG.md, skill Orca
+  ai-init --bmad        tambah BMAD Method (hanya untuk produk atau modul besar)
+  ai-init --impeccable  tambah Impeccable dan UI UX Pro Max (cara lama, opsional)
+  ai-init --no-taste    jangan tawarkan taste init
+USAGE
+}
+
+with_bmad=false
+with_impeccable=false
+offer_taste=true
+for arg in "$@"; do
+  case "$arg" in
+    --bmad) with_bmad=true ;;
+    --impeccable) with_impeccable=true ;;
+    --no-taste) offer_taste=false ;;
+    -h|--help) usage; exit 0 ;;
+    *) echo "Opsi tidak dikenal: $arg"; usage; exit 2 ;;
+  esac
+done
+
+[ -d .git ] || { echo "Jalankan di root repo proyek (folder yang punya .git)."; exit 1; }
+
+failed=()
+step() {
+  local label="$1"; shift
+  printf '\n==> %s\n' "$label"
+  "$@" || failed+=("$label")
+}
+
+install_bmad() { npx -y bmad-method install --yes --modules bmm --tools claude-code; }
+install_impeccable() {
+  npx -y impeccable install --providers=claude --project -y ||
+  npx -y skills add https://github.com/pbakaus/impeccable --skill impeccable --agent claude-code -y --copy
+}
+install_uipro() {
+  command -v uipro >/dev/null || npm i -g uipro-cli || return 1
+  uipro init --ai claude --force || uipro init --ai claude --force --offline
+}
+install_orca_skill() { npx -y skills add https://github.com/stablyai/orca --skill orca-cli --agent claude-code -y --copy; }
+ensure_ignore() {
+  grep -qxF "$1" .gitignore || echo "$1" >> .gitignore
+}
+install_local() {
+  mkdir -p .githooks .ai/screens .ai/specs .ai/references .ai/security .ai/rules &&
+  cp "$cfg/hooks/pre-commit" .githooks/pre-commit &&
+  chmod +x .githooks/pre-commit &&
+  git config core.hooksPath .githooks &&
+  { [ -f AGENTS.md ] || cp "$cfg/templates/AGENTS.project.md" AGENTS.md; } &&
+  { [ -f WATCHDOG.md ] || cp "$cfg/templates/WATCHDOG.md" WATCHDOG.md; } &&
+  touch .gitignore &&
+  ensure_ignore '.ai/screens/' &&
+  ensure_ignore '.ai/security/' &&
+  ensure_ignore '.taste/candidates/' &&
+  ensure_ignore '.taste/compare.html' &&
+  ensure_ignore '.taste/vision-cache.json'
+}
+
+step "Folder kerja agent, hook, dan template" install_local
+step "Skill CLI Orca" install_orca_skill
+$with_bmad && step "BMAD Method (stable)" install_bmad
+$with_impeccable && step "Impeccable" install_impeccable
+$with_impeccable && step "UI UX Pro Max" install_uipro
+
+if [ "${#failed[@]}" -gt 0 ]; then
+  printf '\nGAGAL: %s\n' "${failed[*]}"
+  echo "Perbaiki koneksi atau penyebabnya, lalu jalankan ai-init lagi (aman diulang)."
+fi
+
+has_ui=false
+if [ -n "$(find resources/views application/views src app pages components -maxdepth 4 -type f \( -name '*.blade.php' -o -name '*.tsx' -o -name '*.jsx' -o -name '*.vue' -o -path '*/views/*.php' \) 2>/dev/null | head -1)" ]; then
+  has_ui=true
+fi
+
+if $offer_taste && [ ! -f DESIGN.md ] && [ ! -f .taste/taste.json ]; then
+  if $has_ui; then
+    printf '\nProyek ini sudah punya tampilan. Agent akan MIRROR gaya yang ada.\nJalankan "taste init" hanya jika Anda ingin arah visual baru.\n'
+  elif [ -t 0 ] && command -v taste >/dev/null; then
+    printf '\nBelum ada arah visual (DESIGN.md). Jalankan taste init sekarang? [Y/n] '
+    read -r answer
+    case "${answer:-y}" in
+      [nN]*) echo "Lewati. Jalankan nanti dengan: taste init" ;;
+      *) taste init ;;
+    esac
+  fi
+fi
+
+cat <<'EOF2'
+
+Langkah berikutnya:
+  1. Lengkapi AGENTS.md proyek: stack, mode (MIRROR atau STANDARD), perintah lint dan test, folder terlarang.
+  2. Arah visual: taste init, buka .taste/compare.html, lalu taste pick <preset>. Commit DESIGN.md, .taste/, dan aset taste.
+  3. Buka OMP di folder ini dan tulis tugasnya. Task Router, BRAIN.md, BACKEND.md, lessons, dan audit berjalan dari AGENTS.md.
+  4. Commit .ai/lessons.json dan .ai/rules/ supaya pelajaran dibagi ke seluruh tim.
+  5. Proyek legacy dengan banyak temuan lama: export DEVSTACK_GATE=warn untuk sementara.
+EOF2
+
+[ "${#failed[@]}" -eq 0 ]

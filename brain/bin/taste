@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+BRAIN="${DEVSTACK_BRAIN:-/opt/devstack}"
+PY="$BRAIN/venv/bin/python"
+[ -x "$PY" ] || PY=python3
+T="$BRAIN/taste-pack/tools"
+usage() {
+  cat <<'USAGE'
+taste: otak UI devstack
+
+  taste init [--answers file.json]   pertanyaan arah visual, buat 3 kandidat di .taste/compare.html
+  taste pick <preset>                kunci arah visual ke proyek (DESIGN.md, token, aset)
+  taste vision [--off]               atur model vision opsional untuk review
+  taste build <page.json> <out.html> rakit halaman dari blok atau layar
+  taste lint [paths]                 tolak warna, ukuran, inline style di luar token
+  taste contrast                     uji kontras token preset
+  taste check <url...>               overflow, error console, target sentuh di 375/768/1440
+  taste review <url...>              review visual dengan model vision (dilewati jika tidak ada)
+  taste path                         lokasi taste pack
+USAGE
+}
+cmd="${1:-help}"
+[ $# -gt 0 ] && shift
+case "$cmd" in
+  init) exec "$PY" "$T/taste_init.py" ask "$@" ;;
+  pick) exec "$PY" "$T/taste_init.py" pick "$@" ;;
+  vision) exec "$PY" "$T/taste_init.py" vision "$@" ;;
+  build) exec "$PY" "$T/assemble.py" "$@" ;;
+  lint) exec "$PY" "$T/lint_tokens.py" "$@" ;;
+  contrast) exec "$PY" "$T/contrast.py" "$@" ;;
+  check) exec "$PY" "$T/ui_check.py" "$@" ;;
+  review) exec "$PY" "$T/taste_review.py" "$@" ;;
+  path) echo "$BRAIN/taste-pack" ;;
+  help|-h|--help) usage ;;
+  *) usage; exit 2 ;;
+esac

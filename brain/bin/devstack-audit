@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+BRAIN="${DEVSTACK_BRAIN:-/opt/devstack}"
+PY="$BRAIN/venv/bin/python"
+[ -x "$PY" ] || PY=python3
+export PATH="$BRAIN/venv/bin:$PATH"
+exec "$PY" "$BRAIN/audit/tools/audit.py" "$@"

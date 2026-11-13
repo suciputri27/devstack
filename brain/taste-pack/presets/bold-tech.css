@@ -1,0 +1,38 @@
+:root {
+  --bg: oklch(0.165 0.012 255);
+  --bg-2: oklch(0.19 0.014 255);
+  --surface: oklch(0.215 0.016 255);
+  --surface-2: oklch(0.25 0.018 255);
+  --ink: oklch(0.97 0.004 255);
+  --ink-2: oklch(0.8 0.012 255);
+  --ink-3: oklch(0.68 0.014 255);
+  --line: oklch(1 0 0 / 0.09);
+  --line-strong: oklch(1 0 0 / 0.18);
+  --accent: oklch(0.9 0.19 125);
+  --on-accent: oklch(0.2 0.04 125);
+  --accent-soft: oklch(0.9 0.19 125 / 0.12);
+  --accent-2: oklch(0.76 0.15 40);
+  --focus: oklch(0.9 0.19 125);
+  --danger: oklch(0.72 0.17 25);
+  --success: oklch(0.82 0.17 150);
+  --warning: oklch(0.82 0.15 75);
+  --on-danger: oklch(0.18 0.04 25);
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Geist", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "Cascadia Code", monospace;
+  --display-weight: 700;
+  --display-tracking: -0.035em;
+  --display-leading: 1.02;
+  --radius-s: 8px;
+  --radius-m: 14px;
+  --radius-l: 22px;
+  --radius-pill: 999px;
+  --shadow-1: 0 1px 0 oklch(1 0 0 / 0.06) inset, 0 8px 24px oklch(0 0 0 / 0.35);
+  --shadow-2: 0 1px 0 oklch(1 0 0 / 0.08) inset, 0 24px 60px oklch(0 0 0 / 0.5);
+  --hero-pattern: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  --hero-pattern-size: 56px 56px;
+  --hero-glow: radial-gradient(60% 50% at 75% 20%, oklch(0.9 0.19 125 / 0.16), transparent 70%), radial-gradient(40% 40% at 10% 90%, oklch(0.76 0.15 40 / 0.12), transparent 70%);
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur: 600ms;
+  color-scheme: dark;
+}

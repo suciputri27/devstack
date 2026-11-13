@@ -1,0 +1,58 @@
+{{> partials/shell-start}}
+<form class="card" data-ui="form" data-draft-key="pengajuan-izin" data-demo action="#" method="post">
+  <div class="wizard" data-ui="wizard">
+    <fieldset class="wizard__step" data-title="Jenis izin">
+      <legend class="wizard__legend">Izin apa yang diajukan?</legend>
+      <fieldset class="choices">
+        <legend class="sr-only">Jenis izin</legend>
+        <label class="choice"><input type="radio" name="leave_type" value="tahunan" required checked><span class="choice__title">Cuti tahunan</span><span class="choice__desc">Sisa kuota Anda 9 hari.</span></label>
+        <label class="choice"><input type="radio" name="leave_type" value="sakit"><span class="choice__title">Sakit</span><span class="choice__desc">Lebih dari 2 hari wajib surat dokter.</span></label>
+        <label class="choice"><input type="radio" name="leave_type" value="dinas"><span class="choice__title">Dinas luar</span><span class="choice__desc">Lampirkan surat tugas.</span></label>
+      </fieldset>
+      <div class="field">
+        <label class="field__label" for="w-reason"><span data-label-text>Alasan<span class="field__req" aria-hidden="true">*</span></span></label>
+        <textarea class="textarea" id="w-reason" name="reason" required minlength="10" maxlength="300" placeholder="Contoh: mengantar orang tua kontrol ke rumah sakit"></textarea>
+      </div>
+    </fieldset>
+
+    <fieldset class="wizard__step" data-title="Waktu">
+      <legend class="wizard__legend">Kapan izinnya?</legend>
+      <div class="form-grid">
+        <div class="field">
+          <label class="field__label" for="w-from"><span data-label-text>Mulai<span class="field__req" aria-hidden="true">*</span></span></label>
+          <input id="w-from" name="date_from" type="date" data-ui="date" required min="2026-11-13">
+        </div>
+        <div class="field">
+          <label class="field__label" for="w-to"><span data-label-text>Sampai<span class="field__req" aria-hidden="true">*</span></span></label>
+          <input id="w-to" name="date_to" type="date" data-ui="date" required min="2026-11-13">
+        </div>
+        <div class="field span-2">
+          <label class="field__label" for="w-sub"><span data-label-text>Pengganti selama izin<span class="field__req" aria-hidden="true">*</span></span></label>
+          <select id="w-sub" name="substitute" data-ui="select" required data-placeholder="Pilih rekan kerja">
+            <option value=""></option>
+            <option value="u1" data-desc="Bagian Umum">Andi Pratama</option>
+            <option value="u2" data-desc="Bagian Umum">Sari Wulandari</option>
+            <option value="u3" data-desc="Bagian Keuangan">Bayu Saputra</option>
+            <option value="u4" data-desc="Bagian Keuangan">Dewi Lestari</option>
+          </select>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="wizard__step" data-title="Lampiran">
+      <legend class="wizard__legend">Lampirkan dokumen pendukung</legend>
+      <div class="field">
+        <span class="field__label" id="w-file-label"><span data-label-text>Dokumen</span><span class="field__opt">opsional untuk cuti tahunan</span></span>
+        <input id="w-file" name="attachments[]" type="file" multiple accept=".pdf,image/*" data-ui="upload" data-max-mb="5" data-max-files="3" aria-labelledby="w-file-label">
+      </div>
+    </fieldset>
+
+    <fieldset class="wizard__step" data-title="Tinjau" data-review>
+      <legend class="wizard__legend">Periksa sebelum dikirim</legend>
+      <p class="page__desc">Pengajuan dikirim ke atasan langsung. Anda akan mendapat notifikasi saat disetujui.</p>
+    </fieldset>
+
+    <button class="btn btn--primary" type="submit" name="intent" value="submit" data-wizard-submit>Kirim pengajuan</button>
+  </div>
+</form>
+{{> partials/shell-end}}

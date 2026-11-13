@@ -1,0 +1,144 @@
+- name: Validasi variabel wajib
+  ansible.builtin.assert:
+    that:
+      - ds_user is match('^[a-z_][a-z0-9_-]{0,31}$')
+      - ds_user != 'root'
+      - ds_pubkey is match('^(ssh-(ed25519|rsa)|ecdsa-sha2-|sk-)')
+      - allowed_subnets | length > 0
+      - server_ip | length > 0
+    fail_msg: >-
+      Cek .env: DEVSTACK_USER harus huruf kecil dan bukan root,
+      DEVSTACK_SSH_PUBKEY harus public key SSH yang valid,
+      SERVER_IP dan ALLOWED_SUBNETS wajib diisi.
+    quiet: true
+
+- name: Validasi format ALLOWED_SUBNETS dan SERVER_IP
+  ansible.builtin.command:
+    argv: "{{ ['python3', '-c', ip_check_code, server_ip] + allowed_subnets }}"
+  vars:
+    ip_check_code: >-
+      import ipaddress, sys;
+      ipaddress.ip_address(sys.argv[1]);
+      [ipaddress.ip_network(n, strict=False) for n in sys.argv[2:]]
+  changed_when: false
+  register: ip_format
+  failed_when: false
+
+- name: Tolak format IP atau subnet yang salah
+  ansible.builtin.assert:
+    that:
+      - ip_format.rc == 0
+    fail_msg: "SERVER_IP atau ALLOWED_SUBNETS tidak valid: {{ ip_format.stderr_lines | last | default('') }}"
+    quiet: true
+
+- name: Ambil daftar IP di interface server
+  ansible.builtin.command: ip -o addr show
+  changed_when: false
+  register: ip_addrs
+
+- name: Pastikan SERVER_IP milik server ini
+  ansible.builtin.assert:
+    that:
+      - (' ' ~ server_ip ~ '/') in ip_addrs.stdout
+    fail_msg: >-
+      IP {{ server_ip }} tidak ditemukan di interface server ini.
+      Isi SERVER_IP dengan IP LAN server (lihat: ip -4 addr), lalu jalankan ulang.
+    quiet: true
+
+- name: Cek koneksi ke semua sumber unduhan
+  ansible.builtin.script:
+    cmd: netcheck.sh
+  register: netcheck
+  changed_when: false
+  failed_when: false
+  when: not (skip_network_check | bool)
+
+- name: Hentikan jika ada sumber unduhan yang diblokir
+  ansible.builtin.fail:
+    msg: |
+      Server tidak bisa menjangkau alamat berikut:
+      {{ netcheck.stdout | trim }}
+      Kemungkinan diblokir firewall atau proxy kantor. Buka akses ke alamat itu,
+      atau set SKIP_NETWORK_CHECK=true di .env jika Anda yakin tidak dibutuhkan.
+  when:
+    - not (skip_network_check | bool)
+    - netcheck.rc | default(0) != 0
+
+- name: Validasi format TEAM_MEMBERS
+  ansible.builtin.assert:
+    that:
+      - item is match('^[a-z_][a-z0-9_-]{0,31}:\\s*(ssh-(ed25519|rsa)|ecdsa-sha2-|sk-)')
+      - (item.split(':', 1) | first | trim) not in ['root', ds_user]
+    fail_msg: >-
+      Entri TEAM_MEMBERS tidak valid: "{{ item[:60] }}".
+      Format: nama:ssh-ed25519 AAAA... dipisah tanda |, nama huruf kecil, bukan root atau {{ ds_user }}.
+    quiet: true
+  loop: "{{ team_members_raw.split('|') | map('trim') | select | list }}"
+  loop_control:
+    label: "{{ item.split(':', 1) | first }}"
+
+- name: Baca anggota tim
+  ansible.builtin.set_fact:
+    team: "{{ team + [{'name': item.split(':', 1) | first | trim, 'key': item.split(':', 1) | last | trim}] }}"
+  loop: "{{ team_members_raw.split('|') | map('trim') | select | list }}"
+  loop_control:
+    label: "{{ item.split(':', 1) | first }}"
+
+- name: Tolak nama anggota tim yang dobel
+  ansible.builtin.assert:
+    that:
+      - team | map(attribute='name') | list | unique | length == team | length
+    fail_msg: "Ada nama yang muncul lebih dari sekali di TEAM_MEMBERS."
+    quiet: true
+
+- name: Daftar pengguna workspace dan rentang port
+  ansible.builtin.set_fact:
+    ws_users: >-
+      {{ [{'name': ds_user, 'primary': true, 'port_base': 8100}]
+         + (team | map('combine', {'primary': false}) | list) }}
+
+- name: Rentang port per anggota tim
+  ansible.builtin.set_fact:
+    ws_users: >-
+      {{ ws_users[: idx + 1] + [ws_users[idx + 1] | combine({'port_base': 8200 + idx * 100})] + ws_users[idx + 2 :] }}
+  loop: "{{ team }}"
+  loop_control:
+    index_var: idx
+    label: "{{ item.name }}"
+
+- name: Cek apakah user kerja sudah ada
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ ds_user }}"
+    fail_key: false
+
+- name: Password wajib untuk user baru
+  ansible.builtin.assert:
+    that:
+      - ds_password | length >= 12
+    fail_msg: "User {{ ds_user }} belum ada. Isi DEVSTACK_USER_PASSWORD minimal 12 karakter (untuk sudo)."
+    quiet: true
+  when: getent_passwd[ds_user] is none
+
+- name: Cek sesi SSH aktif dari luar subnet yang diizinkan
+  ansible.builtin.script:
+    cmd: ssh_guard.py {{ allowed_subnets | map('quote') | join(' ') }}
+    executable: python3
+  register: ssh_guard
+  changed_when: false
+  failed_when: false
+  when: ssh_restricted | bool
+
+- name: Tolak penguncian SSH jika ada sesi dari luar subnet yang diizinkan
+  ansible.builtin.fail:
+    msg: |
+      Ada sesi SSH aktif dari alamat di luar ALLOWED_SUBNETS: {{ ssh_guard.stdout | trim }}
+      Jika lanjut, SSH dari alamat itu akan terkunci setelah firewall aktif.
+      Pilihan:
+        1. Tambahkan subnet alamat itu ke ALLOWED_SUBNETS jika memang jaringan Anda, atau
+        2. Set SSH_RESTRICTED=false sementara, atau
+        3. Set ALLOW_OUTSIDE_SSH_SESSION=true jika Anda punya akses console.
+  when:
+    - ssh_restricted | bool
+    - ssh_guard.rc | default(0) != 0
+    - not (allow_outside_ssh_session | bool)

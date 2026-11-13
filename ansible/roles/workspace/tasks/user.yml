@@ -1,0 +1,189 @@
+- name: "Akses Docker untuk {{ wu.name }}"
+  ansible.builtin.user:
+    name: "{{ wu.name }}"
+    groups: docker
+    append: true
+  when: wu.primary or team_docker_access | bool
+
+- name: "Folder ~/.local/bin {{ wu.name }}"
+  ansible.builtin.file:
+    path: "{{ wu_home }}/.local/bin"
+    state: directory
+    owner: "{{ wu.name }}"
+    group: "{{ wu.name }}"
+    mode: "0755"
+
+- name: "Link fd {{ wu.name }}"
+  ansible.builtin.file:
+    src: /usr/bin/fdfind
+    dest: "{{ wu_home }}/.local/bin/fd"
+    state: link
+    follow: false
+    owner: "{{ wu.name }}"
+    group: "{{ wu.name }}"
+
+- name: "uv (dibutuhkan BMAD) untuk {{ wu.name }}"
+  ansible.builtin.shell: set -o pipefail && curl -LsSf https://astral.sh/uv/install.sh | sh
+  args:
+    executable: /bin/bash
+    creates: "{{ wu_home }}/.local/bin/uv"
+  become: true
+  become_user: "{{ wu.name }}"
+  environment:
+    UV_NO_MODIFY_PATH: "1"
+  tags: [net]
+
+- name: "Bun (dibutuhkan OMP) untuk {{ wu.name }}"
+  ansible.builtin.shell: set -o pipefail && curl -fsSL https://bun.sh/install | bash
+  args:
+    executable: /bin/bash
+    creates: "{{ wu_home }}/.bun/bin/bun"
+  become: true
+  become_user: "{{ wu.name }}"
+  tags: [net]
+
+- name: "OMP untuk {{ wu.name }}"
+  ansible.builtin.command: "{{ wu_home }}/.bun/bin/bun install -g {{ omp_package }}"
+  args:
+    creates: "{{ wu_home }}/.bun/bin/omp"
+  become: true
+  become_user: "{{ wu.name }}"
+  environment:
+    PATH: "{{ wu_home }}/.bun/bin:/usr/local/bin:/usr/bin:/bin"
+  tags: [net]
+
+- name: "Chromium Playwright untuk {{ wu.name }}"
+  ansible.builtin.command: npx -y playwright install chromium
+  args:
+    creates: "{{ wu_home }}/.cache/ms-playwright"
+  become: true
+  become_user: "{{ wu.name }}"
+  when: install_playwright | bool
+  tags: [net]
+
+- name: "Chromium untuk tool taste (Playwright Python) {{ wu.name }}"
+  ansible.builtin.command: "{{ brain_dir }}/venv/bin/python -m playwright install chromium"
+  become: true
+  become_user: "{{ wu.name }}"
+  register: ws_py_chromium
+  changed_when: "'downloaded' in (ws_py_chromium.stdout | lower)"
+  when: install_playwright | bool
+  tags: [net, brain]
+
+- name: "Clone omp-config dari repo untuk {{ wu.name }}"
+  ansible.builtin.git:
+    repo: "{{ omp_config_repo }}"
+    dest: "{{ wu_cfg }}"
+    update: false
+    accept_hostkey: true
+  become: true
+  become_user: "{{ wu.name }}"
+  when: omp_config_repo | length > 0
+
+- name: "Salin omp-config bawaan tanpa menimpa file yang ada untuk {{ wu.name }}"
+  ansible.builtin.copy:
+    src: "{{ devstack_root }}/omp-config/"
+    dest: "{{ wu_cfg }}/"
+    owner: "{{ wu.name }}"
+    group: "{{ wu.name }}"
+    force: false
+    mode: preserve
+  when: omp_config_repo | length == 0
+
+- name: "File yang bergantung pada SERVER_IP untuk {{ wu.name }}"
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ wu_cfg }}/{{ item.dest }}"
+    owner: "{{ wu.name }}"
+    group: "{{ wu.name }}"
+    mode: "0644"
+    force: false
+  loop:
+    - { src: models.yml.j2, dest: agent/models.yml }
+    - { src: machine.yml.j2, dest: machine/devbox.yml }
+    - { src: machine.yml.j2, dest: machine/laptop.yml }
+
+- name: "Skrip omp-config bisa dieksekusi untuk {{ wu.name }}"
+  ansible.builtin.file:
+    path: "{{ wu_cfg }}/{{ item }}"
+    mode: "0755"
+  loop:
+    - install.sh
+    - bin/ai-init
+    - hooks/pre-commit
+
+- name: "Inisialisasi git omp-config {{ wu.name }}"
+  ansible.builtin.shell: |
+    set -e
+    git init -q -b main
+    git add -A
+    git -c user.name="devstack" -c user.email="devstack@localhost" commit -q -m "chore: initial omp-config from devstack"
+  args:
+    chdir: "{{ wu_cfg }}"
+    creates: "{{ wu_cfg }}/.git"
+  become: true
+  become_user: "{{ wu.name }}"
+
+- name: "Symlink omp-config ke ~/.omp/agent {{ wu.name }}"
+  ansible.builtin.command: "{{ wu_cfg }}/install.sh"
+  become: true
+  become_user: "{{ wu.name }}"
+  register: ws_link
+  changed_when: "'Linked' in ws_link.stdout"
+
+- name: "File secret OMP {{ wu.name }}"
+  ansible.builtin.copy:
+    dest: "{{ wu_home }}/.omp/agent/.env"
+    content: "# Secret OMP. Jangan di-commit.\n"
+    owner: "{{ wu.name }}"
+    group: "{{ wu.name }}"
+    mode: "0600"
+    force: false
+
+- name: "Isi secret OMP dari .env devstack (hanya pengguna utama)"
+  ansible.builtin.lineinfile:
+    path: "{{ wu_home }}/.omp/agent/.env"
+    regexp: "^{{ item.key }}="
+    line: "{{ item.key }}={{ item.value }}"
+    owner: "{{ wu.name }}"
+    group: "{{ wu.name }}"
+    mode: "0600"
+  loop: "{{ omp_secrets | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when:
+    - wu.primary
+    - item.value | length > 0
+  no_log: true
+
+- name: "Placeholder secret tanpa menyentuh nilai yang ada untuk {{ wu.name }}"
+  ansible.builtin.shell: |
+    grep -q '^{{ item.key }}=' {{ env_file }} && echo exists || echo '{{ item.key }}={{ default_value }}' >> {{ env_file }}
+  vars:
+    env_file: "{{ wu_home }}/.omp/agent/.env"
+    default_value: "{{ item.value if item.key == 'GITLAB_API_URL' else '' }}"
+  loop: "{{ omp_secrets | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when: not wu.primary or item.value | length == 0
+  become: true
+  become_user: "{{ wu.name }}"
+  register: ws_placeholder
+  changed_when: "'exists' not in ws_placeholder.stdout"
+
+- name: "PATH, override mesin, dan rentang port {{ wu.name }}"
+  ansible.builtin.blockinfile:
+    path: "{{ wu_home }}/{{ item }}"
+    marker: "# {mark} devstack"
+    block: |
+      export PATH="$HOME/.local/bin:$HOME/.bun/bin:$HOME/omp-config/bin:$PATH"
+      export PI_CONFIG_FILES="$HOME/omp-config/machine/devbox.yml"
+      export DEVSTACK_PORT_BASE={{ wu.port_base }}
+      export DEVSTACK_LESSONS_GLOBAL="$HOME/omp-config/agent/lessons.json"
+    owner: "{{ wu.name }}"
+    group: "{{ wu.name }}"
+    create: true
+    mode: "0644"
+  loop:
+    - .profile
+    - .bashrc

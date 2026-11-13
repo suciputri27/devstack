@@ -1,0 +1,60 @@
+devstack_root: "{{ playbook_dir | dirname }}"
+
+ds_user: "{{ lookup('env', 'DEVSTACK_USER') | default('dev', true) }}"
+ds_password: "{{ lookup('env', 'DEVSTACK_USER_PASSWORD') }}"
+ds_pubkey: "{{ lookup('env', 'DEVSTACK_SSH_PUBKEY') }}"
+ds_hostname: "{{ lookup('env', 'DEVSTACK_HOSTNAME') | default('devbox', true) }}"
+ds_timezone: "{{ lookup('env', 'DEVSTACK_TIMEZONE') | default('Asia/Jakarta', true) }}"
+ds_home: "/home/{{ ds_user }}"
+
+server_ip: "{{ lookup('env', 'SERVER_IP') }}"
+allowed_subnets: "{{ (lookup('env', 'ALLOWED_SUBNETS') | default('', true)).split() }}"
+public_ports: "{{ (lookup('env', 'PUBLIC_PORTS') | default('', true)).split() }}"
+ssh_restricted: "{{ lookup('env', 'SSH_RESTRICTED') | default('true', true) | bool }}"
+skip_network_check: "{{ lookup('env', 'SKIP_NETWORK_CHECK') | default('false', true) | bool }}"
+allow_outside_ssh_session: "{{ lookup('env', 'ALLOW_OUTSIDE_SSH_SESSION') | default('false', true) | bool }}"
+
+git_name: "{{ lookup('env', 'GIT_NAME') }}"
+git_email: "{{ lookup('env', 'GIT_EMAIL') }}"
+
+php_versions: "{{ (lookup('env', 'PHP_VERSIONS') | default('8.3 7.4', true)).split() }}"
+php_extensions: [cli, mbstring, xml, curl, zip, pgsql, mysql, intl, bcmath, gd, sqlite3]
+node_major: "{{ lookup('env', 'NODE_MAJOR') | default('22', true) }}"
+npm_globals_default: "intelephense typescript typescript-language-server vscode-langservers-extracted uipro-cli"
+npm_globals: "{{ (lookup('env', 'NPM_GLOBALS') | default(npm_globals_default, true)).split() }}"
+install_playwright: "{{ lookup('env', 'INSTALL_PLAYWRIGHT') | default('true', true) | bool }}"
+
+ninerouter_image: "{{ lookup('env', 'NINEROUTER_IMAGE') | default('decolua/9router', true) }}"
+ninerouter_tag: "{{ lookup('env', 'NINEROUTER_IMAGE_TAG') | default('0.5.112', true) }}"
+ninerouter_port: 20128
+ninerouter_dir: /opt/9router
+
+enable_searxng: "{{ lookup('env', 'ENABLE_SEARXNG') | default('true', true) | bool }}"
+searxng_image: "{{ lookup('env', 'SEARXNG_IMAGE') | default('searxng/searxng', true) }}"
+searxng_tag: "{{ lookup('env', 'SEARXNG_IMAGE_TAG') | default('latest', true) }}"
+searxng_port: 8888
+searxng_dir: /opt/searxng
+
+team_members_raw: "{{ lookup('env', 'TEAM_MEMBERS') }}"
+team_docker_access: "{{ lookup('env', 'TEAM_DOCKER_ACCESS') | default('true', true) | bool }}"
+docker_lxc_pin_setting: "{{ lookup('env', 'DOCKER_LXC_PIN') | default('auto', true) }}"
+team: []
+
+devstack_version: "{{ lookup('file', devstack_root ~ '/VERSION') | trim }}"
+brain_dir: /opt/devstack
+sync_config: "{{ lookup('env', 'DEVSTACK_SYNC_CONFIG') | default('true', true) | bool }}"
+semgrep_version: "{{ lookup('env', 'SEMGREP_VERSION') | default('', true) }}"
+playwright_py_version: "{{ lookup('env', 'PLAYWRIGHT_PY_VERSION') | default('', true) }}"
+
+omp_package: "{{ lookup('env', 'OMP_PACKAGE') | default('@oh-my-pi/pi-coding-agent', true) }}"
+omp_config_repo: "{{ lookup('env', 'OMP_CONFIG_REPO') }}"
+omp_config_dir: "{{ ds_home }}/omp-config"
+
+omp_secrets:
+  NINEROUTER_API_KEY: "{{ lookup('env', 'NINEROUTER_API_KEY') }}"
+  GITHUB_TOKEN: "{{ lookup('env', 'GITHUB_TOKEN') }}"
+  GITLAB_TOKEN: "{{ lookup('env', 'GITLAB_TOKEN') }}"
+  GITLAB_API_URL: "{{ lookup('env', 'GITLAB_API_URL') | default('https://gitlab.com/api/v4', true) }}"
+  CONTEXT7_API_KEY: "{{ lookup('env', 'CONTEXT7_API_KEY') }}"
+
+deb_arch: "{{ 'arm64' if ansible_architecture in ['aarch64', 'arm64'] else 'amd64' }}"

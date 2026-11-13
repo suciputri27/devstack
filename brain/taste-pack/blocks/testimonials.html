@@ -1,0 +1,15 @@
+<section class="section {{#alt}}section--alt{{/alt}}" id="{{id}}">
+  <div class="container">
+    <div class="section__head">
+      <span class="eyebrow">{{eyebrow}}</span>
+      <h2 class="title">{{title}}</h2>
+    </div>
+    <div class="quotes">
+      {{#items}}<figure class="quote {{#featured}}quote--featured{{/featured}}" data-reveal>
+        <blockquote class="quote__text"><p>{{quote}}</p></blockquote>
+        <figcaption class="quote__by"><span class="quote__avatar" aria-hidden="true">{{initials}}</span><span><span class="quote__name">{{name}}</span><span class="quote__role">{{role}}</span></span></figcaption>
+      </figure>
+      {{/items}}
+    </div>
+  </div>
+</section>

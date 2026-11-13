@@ -1,0 +1,21 @@
+<section class="hero" id="top">
+  <div class="container hero__grid">
+    <div class="hero__copy">
+      {{#badge}}<span class="badge" data-reveal><span class="badge__dot" aria-hidden="true"></span>{{badge}}</span>{{/badge}}
+      <h1 class="hero__title" data-reveal>{{title}}</h1>
+      <p class="lead" data-reveal>{{lead}}</p>
+      <div class="hero__actions" data-reveal>
+        <a class="btn btn--primary" href="{{primary_href}}" data-magnetic>{{primary_label}} <span class="btn__arrow" aria-hidden="true">&rarr;</span></a>
+        {{#secondary_label}}<a class="btn btn--ghost" href="{{secondary_href}}">{{secondary_label}}</a>{{/secondary_label}}
+      </div>
+      <ul class="hero__proof" role="list" data-reveal>
+        {{#proof}}<li>{{.}}</li>
+        {{/proof}}
+      </ul>
+    </div>
+    <div class="terminal" data-reveal role="img" aria-label="{{terminal_label}}">
+      <div class="terminal__bar" aria-hidden="true"><span class="terminal__dot"></span><span class="terminal__dot"></span><span class="terminal__dot"></span><span class="terminal__name">{{terminal_name}}</span></div>
+      <pre class="terminal__body" data-terminal aria-hidden="true">{{#lines}}<span class="terminal__line terminal__line--{{kind}}">{{text}}</span>{{/lines}}</pre>
+    </div>
+  </div>
+</section>

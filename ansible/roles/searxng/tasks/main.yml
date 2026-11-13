@@ -1,0 +1,39 @@
+- name: Folder SearXNG
+  ansible.builtin.file:
+    path: "{{ searxng_dir }}/config"
+    state: directory
+    mode: "0755"
+
+- name: Cek konfigurasi SearXNG
+  ansible.builtin.stat:
+    path: "{{ searxng_dir }}/config/settings.yml"
+  register: sx_settings
+
+- name: Konfigurasi SearXNG (sekali saja)
+  ansible.builtin.template:
+    src: settings.yml.j2
+    dest: "{{ searxng_dir }}/config/settings.yml"
+    mode: "0644"
+  vars:
+    sx_secret: "{{ lookup('password', '/dev/null chars=hexdigits length=64') }}"
+  when: not sx_settings.stat.exists
+  no_log: true
+
+- name: docker-compose.yml SearXNG
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ searxng_dir }}/docker-compose.yml"
+    mode: "0644"
+
+- name: Jalankan SearXNG
+  ansible.builtin.command: docker compose up -d --remove-orphans
+  args:
+    chdir: "{{ searxng_dir }}"
+  register: sx_up
+  changed_when: "'Started' in sx_up.stderr or 'Recreated' in sx_up.stderr or 'Created' in sx_up.stderr"
+
+- name: Tunggu SearXNG siap
+  ansible.builtin.wait_for:
+    host: "{{ server_ip }}"
+    port: "{{ searxng_port }}"
+    timeout: 120

@@ -1,0 +1,141 @@
+rules:
+  - id: sql-raw-concat
+    message: Raw SQL built with concatenation or interpolation. Use bindings (? placeholders) or the query builder.
+    severity: ERROR
+    metadata: { area: injection, cwe: "CWE-89" }
+    languages: [generic]
+    paths: { include: ["*.php"] }
+    pattern-either:
+      - pattern-regex: |-
+          (whereRaw|orWhereRaw|orderByRaw|selectRaw|havingRaw|groupByRaw|DB::raw|DB::select|DB::statement|DB::unprepared|DB::insert|DB::update|DB::delete)\(\s*("[^"]*\$\w|"[^"]*"\s*\.|'[^']*'\s*\.)
+      - pattern-regex: |-
+          \$this->db->query\(\s*("[^"]*\$\w|"[^"]*"\s*\.|'[^']*'\s*\.)
+      - pattern-regex: |-
+          ->(where|or_where|having|order_by)\(\s*("[^"]*"|'[^']*')\s*\.\s*\$
+  - id: sql-orderby-user-input
+    message: Sort column or direction comes from user input. Map it through an allowlist of columns and directions.
+    severity: ERROR
+    metadata: { area: injection, cwe: "CWE-89" }
+    languages: [generic]
+    paths: { include: ["*.php"] }
+    pattern-regex: |-
+      (orderBy|orderByRaw|order_by)\(\s*(\$request->|request\(|\$this->input->|\$_GET|\$_POST)
+  - id: mass-assignment-request-all
+    message: Mass assignment from the whole request. Use $request->validated() or an explicit field list.
+    severity: ERROR
+    metadata: { area: injection, cwe: "CWE-915" }
+    languages: [generic]
+    paths: { include: ["*.php"] }
+    pattern-either:
+      - pattern-regex: |-
+          (::|->)(create|forceCreate|update|fill|insert|updateOrCreate|firstOrCreate)\(\s*\$request->all\(\)
+      - pattern-regex: |-
+          \$guarded\s*=\s*\[\s*\]
+  - id: idor-lookup-without-scope
+    message: Record looked up by an id from the request. Scope the query to the current user or tenant, or authorize with a policy.
+    severity: WARNING
+    metadata: { area: authz, cwe: "CWE-639" }
+    languages: [generic]
+    paths: { include: ["*.php"] }
+    pattern-either:
+      - pattern-regex: |-
+          ::(find|findOrFail|whereKey)\(\s*(\$request->|request\(|\$id\b|\$this->input->)
+      - pattern-regex: |-
+          ->get_where\(\s*["']\w+["']\s*,\s*\[\s*["']id["']\s*=>\s*\$this->input->
+      - pattern-regex: |-
+          ->where\(\s*["']id["']\s*,\s*(\$this->input->|\$_GET|\$_POST)
+  - id: integer-id-exposed
+    message: Integer id exposed to the client. Use uuid or public_id on every external surface.
+    severity: WARNING
+    metadata: { area: authz, cwe: "CWE-639" }
+    languages: [generic]
+    paths: { include: ["*.php"] }
+    pattern-either:
+      - pattern-regex: |-
+          data-id=["']\{\{\s*\$\w+->id\s*\}\}
+      - pattern-regex: |-
+          route\([^)]*\$\w+->id\b
+      - pattern-regex: |-
+          (site_url|base_url)\([^)]*\$\w+->id\b
+  - id: remote-code-execution
+    message: Command or code execution with dynamic input. Remove it or use a fixed command with escapeshellarg and an allowlist.
+    severity: ERROR
+    metadata: { area: injection, cwe: "CWE-78" }
+    languages: [generic]
+    paths: { include: ["*.php"] }
+    pattern-either:
+      - pattern-regex: |-
+          \b(eval|assert|system|exec|shell_exec|passthru|popen|proc_open)\s*\([^)]*\$
+      - pattern-regex: |-
+          \bunserialize\s*\(\s*\$
+  - id: ssrf-user-url
+    message: Server fetches a URL that comes from the user. Validate against an allowlist of hosts and block private ranges.
+    severity: WARNING
+    metadata: { area: upload-ssrf, cwe: "CWE-918" }
+    languages: [generic]
+    paths: { include: ["*.php"] }
+    pattern-regex: |-
+      (file_get_contents|fopen|curl_init|Http::(get|post|send|withHeaders\([^)]*\)->get))\(\s*(\$request->|request\(|\$this->input->|\$_GET|\$_POST|\$url\b)
+  - id: weak-password-hash
+    message: Weak password hashing. Use Argon2id (Hash::make with the argon2id driver, password_hash with PASSWORD_ARGON2ID).
+    severity: ERROR
+    metadata: { area: auth-session, cwe: "CWE-916" }
+    languages: [generic]
+    paths: { include: ["*.php"] }
+    pattern-regex: |-
+      \b(md5|sha1|crypt)\s*\(\s*\$\w*(pass|pwd|password)
+  - id: csrf-disabled
+    message: CSRF protection disabled or bypassed. Keep it on and send the token header from Ajax.
+    severity: ERROR
+    metadata: { area: auth-session, cwe: "CWE-352" }
+    languages: [generic]
+    paths: { include: ["*.php"] }
+    pattern-either:
+      - pattern-regex: |-
+          \$config\[['"]csrf_protection['"]\]\s*=\s*FALSE
+      - pattern-regex: |-
+          withoutMiddleware\([^)]*Csrf
+      - pattern-regex: |-
+          \$except\s*=\s*\[\s*['"][^'"]+
+  - id: cors-wildcard
+    message: CORS allows any origin. List explicit origins, never * with credentials.
+    severity: WARNING
+    metadata: { area: config-secrets, cwe: "CWE-942" }
+    languages: [generic]
+    paths: { include: ["*.php"] }
+    pattern-regex: |-
+      ['"]allowed_origins['"]\s*=>\s*\[\s*['"]\*['"]
+  - id: debug-enabled
+    message: Debug mode enabled in committed config. Production must not show stack traces.
+    severity: WARNING
+    metadata: { area: config-secrets, cwe: "CWE-489" }
+    languages: [generic]
+    paths: { include: ["*.php", "*.env.example", ".env.example"] }
+    pattern-either:
+      - pattern-regex: |-
+          ['"]debug['"]\s*=>\s*true
+      - pattern-regex: |-
+          define\(\s*['"]ENVIRONMENT['"]\s*,\s*['"]development['"]
+      - pattern-regex: |-
+          ^APP_DEBUG=true
+  - id: upload-public-or-client-name
+    message: Upload stored in the public root or under the client file name. Store outside public with a random name.
+    severity: WARNING
+    metadata: { area: upload-ssrf, cwe: "CWE-434" }
+    languages: [generic]
+    paths: { include: ["*.php"] }
+    pattern-either:
+      - pattern-regex: |-
+          ->move\(\s*public_path
+      - pattern-regex: |-
+          getClientOriginalName\(\)
+      - pattern-regex: |-
+          \$config\[['"]upload_path['"]\]\s*=\s*['"]\./?(assets|public|uploads)
+  - id: ci3-xss-echo-input
+    message: Request input echoed without escaping. Use html_escape().
+    severity: ERROR
+    metadata: { area: injection, cwe: "CWE-79" }
+    languages: [generic]
+    paths: { include: ["*.php"] }
+    pattern-regex: |-
+      (echo|print|<\?=)\s*\$this->input->(get|post|get_post|cookie)

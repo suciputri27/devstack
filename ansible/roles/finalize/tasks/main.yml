@@ -1,0 +1,115 @@
+- name: Konfigurasi devstack untuk doctor
+  ansible.builtin.copy:
+    dest: /etc/devstack.conf
+    mode: "0644"
+    content: |
+      DEVSTACK_VERSION={{ devstack_version }}
+      DEVSTACK_SOURCE_DIR={{ devstack_root }}
+      DEVSTACK_ENV_FILE={{ lookup('env', 'DEVSTACK_ENV_FILE') | default('/etc/devstack/devstack.env', true) }}
+      DEVSTACK_USER={{ ds_user }}
+      ALLOWED_SUBNETS="{{ allowed_subnets | join(' ') }}"
+      SERVER_IP={{ server_ip }}
+      NINEROUTER_PORT={{ ninerouter_port }}
+      SEARXNG_ENABLED={{ enable_searxng | bool | lower }}
+      SEARXNG_PORT={{ searxng_port }}
+      TEAM_USERS="{{ team | map(attribute='name') | join(' ') }}"
+      SSH_RESTRICTED={{ ssh_restricted | bool | lower }}
+
+- name: Pasang perintah devstack, devstack-doctor, devstack-sync-config
+  ansible.builtin.copy:
+    src: "{{ devstack_root }}/bin/{{ item }}"
+    dest: "/usr/local/bin/{{ item }}"
+    mode: "0755"
+  loop: [devstack, devstack-doctor, devstack-sync-config]
+
+- name: Pustaka tampilan terminal devstack
+  ansible.builtin.copy:
+    src: "{{ devstack_root }}/lib/ui.sh"
+    dest: "{{ brain_dir }}/lib/ui.sh"
+    mode: "0644"
+
+- name: Folder status devstack
+  ansible.builtin.file:
+    path: /var/lib/devstack
+    state: directory
+    mode: "0755"
+
+- name: Layanan cek update devstack
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/devstack-update-check.service
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Cek versi baru devstack
+      After=network-online.target
+      Wants=network-online.target
+
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/local/bin/devstack update --check --quiet
+
+- name: Jadwal cek update harian
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/devstack-update-check.timer
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Cek versi baru devstack setiap hari
+
+      [Timer]
+      OnCalendar=daily
+      RandomizedDelaySec=2h
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
+
+- name: Aktifkan jadwal cek update
+  ansible.builtin.systemd:
+    name: devstack-update-check.timer
+    enabled: true
+    state: started
+    daemon_reload: true
+  failed_when: false
+
+- name: Pesan update saat login SSH
+  ansible.builtin.copy:
+    dest: /etc/update-motd.d/90-devstack
+    mode: "0755"
+    content: |
+      #!/bin/sh
+      v=$(cat /opt/devstack/VERSION 2>/dev/null)
+      [ -n "$v" ] && printf '\n devstack %s  (devstack status, devstack doctor)\n' "$v"
+      if [ -f /var/lib/devstack/update-available ]; then
+        printf ' Update tersedia: %s. Jalankan: sudo devstack update\n' "$(cat /var/lib/devstack/update-available)"
+      fi
+
+- name: Perbarui config bawaan semua pengguna (sebagai commit git, bisa di-revert)
+  ansible.builtin.command: /usr/local/bin/devstack-sync-config
+  register: fin_sync
+  changed_when: "'commit ' in fin_sync.stdout"
+  when: sync_config | bool
+
+- name: Hasil sinkron config
+  ansible.builtin.debug:
+    msg: "{{ fin_sync.stdout_lines | default([]) }}"
+  when: sync_config | bool
+
+- name: Ringkasan
+  ansible.builtin.debug:
+    msg:
+      - "devstack {{ devstack_version }} terpasang. Langkah berikutnya:"
+      - "1. Dari laptop (di kantor, atau VPN aktif dari rumah): ssh {{ ds_user }}@{{ server_ip }}"
+      - "2. Password awal dashboard 9Router: sudo grep INITIAL_PASSWORD {{ ninerouter_dir }}/.env"
+      - "3. Buka http://{{ server_ip }}:{{ ninerouter_port }}/dashboard, ganti password, tambah provider, buat combo dan API key (lihat README)."
+      - "4. Isi NINEROUTER_API_KEY di ~/.omp/agent/.env milik {{ ds_user }}, lalu jalankan: devstack doctor --full"
+      - "5. Public key server untuk GitHub/GitLab: cat {{ ds_home }}/.ssh/id_ed25519.pub"
+      - "Proyek: jalankan ai-init di root repo, lalu taste init untuk arah visual."
+      - "Kelola server: devstack status, devstack doctor, sudo devstack update, sudo devstack config."
+      - "{{ team_note }}"
+  vars:
+    team_note: >-
+      {{ ('6. Anggota tim: ' ~ (team | map(attribute='name') | join(', '))
+          ~ '. Tiap anggota mengisi NINEROUTER_API_KEY miliknya di ~/.omp/agent/.env')
+         if team | length > 0 else '6. Mode satu pengguna (TEAM_MEMBERS kosong).' }}
+  tags: [always]

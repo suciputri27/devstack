@@ -1,0 +1,215 @@
+#!/usr/bin/env bash
+set -uo pipefail
+
+CONF=/etc/devstack.conf
+STATE_DIR=/var/lib/devstack
+LIB=/opt/devstack/lib/ui.sh
+# shellcheck disable=SC1090
+[ -r "$LIB" ] && . "$LIB" || { ui_ok() { echo "ok: $*"; }; ui_warn() { echo "warn: $*"; }; ui_fail() { echo "error: $*" >&2; }; ui_info() { echo "$*"; }; ui_die() { echo "error: $*" >&2; exit 1; }; ui_kv() { printf '  %-8s %s\n' "$1" "$2"; }; ui_title() { printf '\n%s\n' "$*"; }; ui_banner() { printf '\ndevstack %s\n\n' "$1"; }; ui_confirm() { read -r -p "$1 [y/N] " a; [[ "$a" =~ ^[yY] ]]; }; C_DIM=""; C_RESET=""; C_BOLD=""; }
+
+# shellcheck disable=SC1090
+[ -r "$CONF" ] && . "$CONF"
+SRC="${DEVSTACK_SOURCE_DIR:-}"
+ENV_FILE="${DEVSTACK_ENV_FILE:-/etc/devstack/devstack.env}"
+VERSION="$(cat /opt/devstack/VERSION 2>/dev/null || echo "${DEVSTACK_VERSION:-?}")"
+
+need_root() { [ "$(id -u)" -eq 0 ] || ui_die "Perintah ini butuh sudo: sudo devstack $*"; }
+src_owner() { stat -c '%U' "$SRC" 2>/dev/null || echo root; }
+src_git() {
+  local owner
+  owner=$(src_owner)
+  if [ "$owner" = "$(id -un)" ]; then git -C "$SRC" "$@"; else sudo -u "$owner" -H git -C "$SRC" "$@"; fi
+}
+is_git_source() { [ -n "$SRC" ] && [ -d "$SRC/.git" ] && [ -n "$(src_git remote 2>/dev/null)" ]; }
+latest_tag() { src_git tag -l 'v[0-9]*' --sort=-v:refname 2>/dev/null | head -n 1; }
+newer() { [ "$1" != "$2" ] && [ "$(printf '%s\n%s\n' "$1" "$2" | sort -V | tail -n 1)" = "$1" ]; }
+
+changelog_between() {
+  local tag="$1" from="$2"
+  src_git show "$tag:CHANGELOG.md" 2>/dev/null | awk -v from="$from" '
+    /^## / { v = $2; if (v == from) exit; show = 1 }
+    show { print "  " $0 }'
+}
+
+cmd_version() { echo "devstack $VERSION"; }
+
+cmd_status() {
+  ui_banner "$VERSION" "status"
+  ui_kv "Sumber" "${SRC:-tidak diketahui}"
+  if is_git_source; then
+    ui_kv "Repo" "$(src_git remote get-url origin 2>/dev/null)"
+  else
+    ui_kv "Repo" "belum terhubung (sudo devstack source <git-url>)"
+  fi
+  ui_kv "Config" "$ENV_FILE"
+  ui_kv "User" "${DEVSTACK_USER:-?}${TEAM_USERS:+ + $TEAM_USERS}"
+  ui_kv "Server" "${SERVER_IP:-?}"
+  [ -f "$STATE_DIR/update-available" ] && ui_warn "Update tersedia: $(cat "$STATE_DIR/update-available"). Jalankan: sudo devstack update"
+  [ -f "$STATE_DIR/last-update" ] && ui_kv "Update" "$(cat "$STATE_DIR/last-update")"
+  printf '\n'
+  local services=(9router)
+  [ "${SEARXNG_ENABLED:-false}" = "true" ] && services+=(searxng)
+  for svc in "${services[@]}"; do
+    if docker ps --format '{{.Names}}' 2>/dev/null | grep -qx "$svc" || sudo -n docker ps --format '{{.Names}}' 2>/dev/null | grep -qx "$svc"; then
+      ui_ok "$svc berjalan"
+    else
+      ui_warn "$svc tidak terdeteksi (cek dengan: devstack doctor)"
+    fi
+  done
+  printf '\n'
+}
+
+cmd_source() {
+  need_root source
+  local url="${1:-}" user="${DEVSTACK_USER:-root}" target=/opt/devstack/src
+  [ -n "$url" ] || ui_die "Pakai: sudo devstack source <git-url>, contoh git@github.com:nama/devstack.git"
+  if [ -d "$target/.git" ]; then
+    sudo -u "$user" -H git -C "$target" remote set-url origin "$url" || ui_die "Gagal mengubah remote"
+  else
+    install -d -o "$user" -g "$user" -m 0755 "$target"
+    sudo -u "$user" -H git clone -q "$url" "$target" || ui_die "Gagal clone $url sebagai $user. Pastikan key SSH $user terdaftar di repo."
+  fi
+  sed -i '/^DEVSTACK_SOURCE_DIR=/d' "$CONF"
+  echo "DEVSTACK_SOURCE_DIR=$target" >> "$CONF"
+  SRC=$target
+  sudo -u "$user" -H git -C "$target" fetch -q --tags origin
+  ui_ok "Sumber update: $url"
+  ui_ok "Versi terbaru di repo: $(latest_tag || echo 'belum ada tag')"
+  ui_info "Jalankan: sudo devstack update"
+}
+
+cmd_update() {
+  local check=false quiet=false yes=false target=""
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --check) check=true ;;
+      --quiet) quiet=true ;;
+      --yes|-y) yes=true ;;
+      --to) shift; target="${1:-}" ;;
+      *) ui_die "Opsi tidak dikenal: $1" ;;
+    esac
+    shift
+  done
+  $check || need_root update
+  is_git_source || ui_die "Server belum terhubung ke repo devstack. Jalankan: sudo devstack source <git-url>"
+  src_git fetch -q --tags --prune origin 2>/dev/null || ui_die "Gagal mengambil update dari $(src_git remote get-url origin 2>/dev/null). Cek jaringan dan akses repo."
+  local current="v$VERSION" latest
+  latest="${target:-$(latest_tag)}"
+  [ -n "$latest" ] || ui_die "Repo belum punya rilis (tag v*)."
+  src_git rev-parse -q --verify "refs/tags/$latest" >/dev/null || ui_die "Versi $latest tidak ada di repo."
+
+  if $check; then
+    install -d -m 0755 "$STATE_DIR" 2>/dev/null || true
+    if newer "$latest" "$current"; then
+      echo "$latest" > "$STATE_DIR/update-available" 2>/dev/null || true
+      $quiet || ui_info "Update tersedia: $current ke $latest. Jalankan: sudo devstack update"
+    else
+      rm -f "$STATE_DIR/update-available" 2>/dev/null || true
+      $quiet || ui_ok "Sudah versi terbaru ($current)"
+    fi
+    return 0
+  fi
+
+  if [ -z "$target" ] && ! newer "$latest" "$current"; then
+    ui_ok "Sudah versi terbaru ($current)"
+    rm -f "$STATE_DIR/update-available"
+    return 0
+  fi
+  [ -z "$(src_git status --porcelain 2>/dev/null)" ] || ui_die "Ada perubahan lokal di $SRC. Simpan atau buang dulu (git -C $SRC status)."
+
+  ui_banner "$VERSION" "update ke ${latest#v}"
+  local notes
+  notes=$(changelog_between "$latest" "${current#v}")
+  if [ -n "$notes" ]; then
+    printf '%s\n\n' "$notes"
+  else
+    ui_info "Tidak ada catatan rilis untuk $latest."
+  fi
+  $yes || ui_confirm "Update ke $latest sekarang?" y || { ui_info "Dibatalkan."; return 0; }
+
+  local previous
+  previous=$(src_git describe --tags --exact-match 2>/dev/null || src_git rev-parse --short HEAD 2>/dev/null || echo "$current")
+  src_git -c advice.detachedHead=false checkout -q "$latest" || ui_die "Gagal berpindah ke $latest"
+  if "$SRC/install.sh" --yes; then
+    install -d -m 0755 "$STATE_DIR"
+    printf '%s dari %s pada %s\n' "$latest" "$previous" "$(date '+%Y-%m-%d %H:%M')" > "$STATE_DIR/last-update"
+    rm -f "$STATE_DIR/update-available"
+    /usr/local/bin/devstack-doctor || ui_warn "Ada pemeriksaan yang gagal, lihat di atas."
+    ui_ok "devstack sekarang $latest"
+    ui_info "Di setiap proyek, jalankan ai-init lagi agar hook ikut terbarui."
+  else
+    ui_fail "Update ke $latest gagal. Server tetap memakai sisa instalasi sebelumnya."
+    ui_info "Kembali ke versi lama: sudo devstack update --to $previous"
+    ui_info "Detail: sudo devstack logs"
+    return 1
+  fi
+}
+
+cmd_config() {
+  need_root config
+  [ -f "$ENV_FILE" ] || ui_die "Config $ENV_FILE tidak ada."
+  local before after
+  before=$(sha256sum "$ENV_FILE")
+  "${EDITOR:-nano}" "$ENV_FILE"
+  after=$(sha256sum "$ENV_FILE")
+  if [ "$before" != "$after" ]; then
+    ui_confirm "Config berubah. Terapkan sekarang (menjalankan install ulang)?" y && "$SRC/install.sh" --yes
+  else
+    ui_info "Tidak ada perubahan."
+  fi
+}
+
+cmd_logs() {
+  local latest=/var/log/devstack/latest.log
+  [ -r "$latest" ] || ui_die "Belum ada log install (atau jalankan dengan sudo)."
+  if [ "${1:-}" = "--all" ]; then
+    "${PAGER:-less}" "$latest"
+  else
+    grep -nE "FAILED|END" "$latest" | tail -n 20
+    printf '\n%sLog lengkap: %s (devstack logs --all)%s\n' "$C_DIM" "$(readlink -f "$latest")" "$C_RESET"
+  fi
+}
+
+cmd_reinstall() {
+  need_root reinstall
+  [ -x "$SRC/install.sh" ] || ui_die "Installer tidak ditemukan di $SRC"
+  "$SRC/install.sh" "$@"
+}
+
+usage() {
+  cat <<EOF
+devstack $VERSION
+
+Pakai: devstack <perintah>
+
+  status              ringkasan versi, sumber update, layanan
+  doctor [--full]     pemeriksaan kesehatan lengkap
+  update              ambil dan pasang versi terbaru (sudo)
+  update --check      cek apakah ada versi baru
+  update --to vX.Y.Z  pasang versi tertentu, juga untuk rollback (sudo)
+  source <git-url>    hubungkan server ke repo devstack untuk update online (sudo)
+  config              ubah konfigurasi lalu terapkan (sudo)
+  reinstall           jalankan installer lagi dengan config yang sama (sudo)
+  sync-config         perbarui config agent semua user sebagai commit git (sudo)
+  logs [--all]        ringkasan atau isi log install terakhir
+  version             versi terpasang
+
+Perintah kerja harian: taste, devstack-audit, lessons, devstack-verify, ai-init.
+EOF
+}
+
+cmd="${1:-help}"
+[ $# -gt 0 ] && shift
+case "$cmd" in
+  status) cmd_status ;;
+  doctor) exec /usr/local/bin/devstack-doctor "$@" ;;
+  update) cmd_update "$@" ;;
+  source) cmd_source "$@" ;;
+  config) cmd_config ;;
+  reinstall) cmd_reinstall "$@" ;;
+  sync-config) need_root sync-config; exec /usr/local/bin/devstack-sync-config "$@" ;;
+  logs) cmd_logs "$@" ;;
+  version|--version|-V) cmd_version ;;
+  help|-h|--help) usage ;;
+  *) usage; exit 2 ;;
+esac

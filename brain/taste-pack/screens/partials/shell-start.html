@@ -1,0 +1,32 @@
+<a class="skip-link" href="#main">Lewati ke konten</a>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Navigasi aplikasi">
+    <a class="sidebar__brand" href="#"><span class="nav__mark" aria-hidden="true">{{mark}}</span>{{app_name}}</a>
+    {{#nav}}<nav class="sidebar__group" aria-label="{{heading}}">
+      <p class="sidebar__heading">{{heading}}</p>
+      {{#links}}<a class="sidebar__link" href="{{href}}"{{#current}} aria-current="page"{{/current}}>{{label}}{{#count}}<span class="sidebar__count">{{count}}</span>{{/count}}</a>
+      {{/links}}
+    </nav>
+    {{/nav}}
+    <div class="sidebar__foot"><span class="avatar" aria-hidden="true">{{user_initials}}</span><span class="sidebar__user"><strong>{{user_name}}</strong><span>{{user_role}}</span></span></div>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <button class="btn btn--secondary btn--icon topbar__menu" type="button" data-sidebar-toggle aria-controls="sidebar" aria-expanded="false" aria-label="Buka menu"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <form class="topbar__search" role="search" action="#">
+        <label class="sr-only" for="global-search">Cari</label>
+        <div class="input-group"><span class="input-group__addon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span><input class="input" id="global-search" type="search" placeholder="{{search_placeholder}}"></div>
+      </form>
+      <div class="topbar__actions">
+        <button class="btn btn--quiet btn--icon" type="button" aria-label="Notifikasi" data-toast="Tidak ada notifikasi baru"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg></button>
+      </div>
+    </header>
+    <main class="page" id="main">
+      <div class="page__head">
+        <div>
+          <ol class="breadcrumb">{{#breadcrumb}}<li>{{#href}}<a href="{{href}}">{{label}}</a>{{/href}}{{^href}}<span aria-current="page">{{label}}</span>{{/href}}</li>{{/breadcrumb}}</ol>
+          <h1 class="page__title">{{page_title}}</h1>
+          {{#page_desc}}<p class="page__desc">{{page_desc}}</p>{{/page_desc}}
+        </div>
+        {{#page_action_label}}<a class="btn btn--secondary" href="{{page_action_href}}">{{page_action_label}}</a>{{/page_action_label}}
+      </div>

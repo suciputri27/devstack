@@ -1,0 +1,18 @@
+<section class="section {{#alt}}section--alt{{/alt}}" id="{{id}}">
+  <div class="container">
+    <div class="section__head">
+      <span class="eyebrow">{{eyebrow}}</span>
+      <h2 class="title">{{title}}</h2>
+      {{#lead}}<p class="lead">{{lead}}</p>{{/lead}}
+    </div>
+    <div class="bento">
+      {{#items}}<article class="bento__card bento__card--{{size}}" data-reveal>
+        {{#kicker}}<p class="bento__kicker">{{kicker}}</p>{{/kicker}}{{#icon}}<span class="bento__icon" aria-hidden="true">{{icon}}</span>{{/icon}}{{#has_log}}<ul class="bento__log" aria-label="{{title}}">{{#log}}<li><span class="bento__log-state bento__log-state--{{state}}">{{state_label}}</span><span>{{text}}</span></li>{{/log}}</ul>{{/has_log}}
+        <h3 class="bento__title">{{title}}</h3>
+        <p class="bento__text">{{text}}</p>
+        {{#tag}}<span class="bento__tag">{{tag}}</span>{{/tag}}
+      </article>
+      {{/items}}
+    </div>
+  </div>
+</section>

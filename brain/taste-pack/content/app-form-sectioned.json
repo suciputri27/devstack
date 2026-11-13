@@ -1,0 +1,23 @@
+{
+  "kind": "app",
+  "preset": "clean-corporate",
+  "lang": "id",
+  "screen": "screens/form-sectioned.html",
+  "include_data": [
+    "app-shell.json"
+  ],
+  "title": "Tambah pegawai - Sigap",
+  "description": "Form tambah pegawai",
+  "active": "pegawai",
+  "page_title": "Tambah pegawai",
+  "page_desc": "Isian bertanda bintang wajib diisi. Draf tersimpan otomatis.",
+  "breadcrumb": [
+    {
+      "label": "Pegawai",
+      "href": "#"
+    },
+    {
+      "label": "Tambah pegawai"
+    }
+  ]
+}

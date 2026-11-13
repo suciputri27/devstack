@@ -1,0 +1,14 @@
+<section class="section" id="{{id}}">
+  <div class="container">
+    <div class="cta" data-reveal>
+      <div>
+        <h2 class="cta__title">{{title}}</h2>
+        {{#text}}<p class="cta__text">{{text}}</p>{{/text}}
+      </div>
+      <div class="cta__actions">
+        <a class="btn btn--primary" href="{{primary_href}}" data-magnetic>{{primary_label}} <span class="btn__arrow" aria-hidden="true">&rarr;</span></a>
+        {{#secondary_label}}<a class="btn btn--ghost" href="{{secondary_href}}">{{secondary_label}}</a>{{/secondary_label}}
+      </div>
+    </div>
+  </div>
+</section>

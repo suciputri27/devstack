@@ -1,0 +1,127 @@
+- name: Update dan upgrade paket
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+    upgrade: dist
+
+- name: Paket dasar
+  ansible.builtin.apt:
+    name:
+      - acl
+      - git
+      - curl
+      - wget
+      - unzip
+      - zip
+      - jq
+      - tmux
+      - htop
+      - gnupg
+      - ca-certificates
+      - software-properties-common
+      - build-essential
+      - ripgrep
+      - fd-find
+      - postgresql-client
+      - mysql-client
+      - python3
+      - python3-venv
+      - python3-pip
+      - fail2ban
+      - unattended-upgrades
+      - ufw
+      - openssl
+      - rsync
+    state: present
+
+- name: Folder state devstack
+  ansible.builtin.file:
+    path: /var/lib/devstack
+    state: directory
+    mode: "0755"
+
+- name: Zona waktu
+  community.general.timezone:
+    name: "{{ ds_timezone }}"
+
+- name: Hostname
+  ansible.builtin.hostname:
+    name: "{{ ds_hostname }}"
+
+- name: Hostname di /etc/hosts
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^127\.0\.1\.1\s'
+    line: "127.0.1.1 {{ ds_hostname }}"
+
+- name: User kerja
+  ansible.builtin.user:
+    name: "{{ ds_user }}"
+    shell: /bin/bash
+    groups: sudo
+    append: true
+    create_home: true
+    password: "{{ (ds_password | password_hash('sha512')) if ds_password | length > 0 else omit }}"
+    update_password: on_create
+
+- name: SSH key user kerja
+  ansible.posix.authorized_key:
+    user: "{{ ds_user }}"
+    key: "{{ ds_pubkey }}"
+    state: present
+
+- name: User anggota tim (tanpa sudo, login hanya dengan SSH key)
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    shell: /bin/bash
+    create_home: true
+    password: "*"
+    update_password: on_create
+  loop: "{{ team }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: SSH key anggota tim
+  ansible.posix.authorized_key:
+    user: "{{ item.name }}"
+    key: "{{ item.key }}"
+    state: present
+  loop: "{{ team }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Git identity
+  community.general.git_config:
+    scope: global
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+  become: true
+  become_user: "{{ ds_user }}"
+  loop:
+    - { name: user.name, value: "{{ git_name }}" }
+    - { name: user.email, value: "{{ git_email }}" }
+    - { name: init.defaultBranch, value: main }
+    - { name: pull.rebase, value: "true" }
+  when: item.value | length > 0
+
+- name: SSH key milik server untuk GitHub/GitLab
+  community.crypto.openssh_keypair:
+    path: "{{ ds_home }}/.ssh/id_ed25519"
+    type: ed25519
+    comment: "{{ ds_user }}@{{ ds_hostname }}"
+    owner: "{{ ds_user }}"
+    group: "{{ ds_user }}"
+
+- name: Update keamanan otomatis
+  ansible.builtin.copy:
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    content: |
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Unattended-Upgrade "1";
+    mode: "0644"
+
+- name: Fail2ban aktif
+  ansible.builtin.systemd:
+    name: fail2ban
+    enabled: true
+    state: started

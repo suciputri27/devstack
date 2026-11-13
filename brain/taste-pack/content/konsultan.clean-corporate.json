@@ -1,0 +1,286 @@
+{
+  "preset": "clean-corporate",
+  "lang": "id",
+  "title": "Arunika Integrasi: digitalisasi layanan publik yang benar-benar dipakai",
+  "description": "Konsultan integrasi sistem untuk instansi dan BUMD. Dari pemetaan proses sampai sistem berjalan, dengan keamanan dan dokumentasi yang siap diaudit.",
+  "globals": {
+    "brand": "Arunika",
+    "mark": "A"
+  },
+  "blocks": [
+    {
+      "type": "nav",
+      "skip_label": "Lewati ke konten",
+      "menu_label": "Menu utama",
+      "links": [
+        {
+          "label": "Layanan",
+          "href": "#layanan"
+        },
+        {
+          "label": "Pendekatan",
+          "href": "#pendekatan"
+        },
+        {
+          "label": "Dampak",
+          "href": "#dampak"
+        },
+        {
+          "label": "Tanya jawab",
+          "href": "#tanya"
+        }
+      ],
+      "cta_label": "Konsultasi gratis",
+      "cta_href": "#kontak"
+    },
+    {
+      "type": "hero-statement",
+      "eyebrow": "Konsultan integrasi sistem",
+      "title": "Layanan publik digital yang *benar-benar dipakai* warga.",
+      "lead": "Kami membantu instansi dan BUMD menyatukan sistem yang terpisah, memangkas antrean, dan menyiapkan dokumentasi yang lolos audit.",
+      "primary_label": "Konsultasi gratis",
+      "primary_href": "#kontak",
+      "secondary_label": "Lihat pendekatan kami",
+      "secondary_href": "#pendekatan",
+      "facts": [
+        {
+          "value": "4 bln",
+          "label": "rata-rata dari kickoff sampai sistem berjalan"
+        },
+        {
+          "value": "SPBE",
+          "label": "arsitektur disusun mengikuti kerangka nasional"
+        },
+        {
+          "value": "24/7",
+          "label": "pemantauan setelah serah terima"
+        }
+      ]
+    },
+    {
+      "type": "logos",
+      "label": "Contoh jenis klien yang kami dampingi",
+      "names": [
+        "Dinas Kependudukan",
+        "Rumah Sakit Daerah",
+        "BUMD Air Minum",
+        "Dinas Perizinan",
+        "Badan Pendapatan",
+        "Kampus Negeri",
+        "Dinas Pendidikan"
+      ]
+    },
+    {
+      "type": "steps",
+      "id": "pendekatan",
+      "eyebrow": "Pendekatan",
+      "title": "Empat tahap, satu penanggung jawab.",
+      "lead": "Setiap tahap punya hasil yang bisa Anda periksa sebelum lanjut ke tahap berikutnya.",
+      "items": [
+        {
+          "title": "Pemetaan proses",
+          "text": "Kami duduk bersama petugas loket dan mencatat alur yang sebenarnya, bukan yang ada di SOP."
+        },
+        {
+          "title": "Rancangan sistem",
+          "text": "Arsitektur, integrasi data, dan rencana keamanan disusun dalam satu dokumen yang mudah direview."
+        },
+        {
+          "title": "Pembangunan bertahap",
+          "text": "Fitur dirilis per dua minggu ke lingkungan uji, sehingga masukan bisa diberikan sejak awal."
+        },
+        {
+          "title": "Serah terima",
+          "text": "Pelatihan petugas, dokumentasi lengkap, dan pemantauan sampai sistem stabil."
+        }
+      ]
+    },
+    {
+      "type": "bento",
+      "id": "layanan",
+      "alt": true,
+      "eyebrow": "Layanan",
+      "title": "Satu tim untuk seluruh siklus sistem.",
+      "items": [
+        {
+          "size": "wide",
+          "kicker": "1 pintu",
+          "title": "Integrasi data antarinstansi",
+          "text": "Menghubungkan sistem kependudukan, perizinan, dan keuangan tanpa memaksa semua pihak mengganti aplikasinya.",
+          "tag": "integrasi"
+        },
+        {
+          "size": "normal",
+          "icon": "SEC",
+          "title": "Audit keamanan",
+          "text": "Uji kerentanan, review kode, dan rekomendasi perbaikan yang diprioritaskan menurut risiko.",
+          "tag": "keamanan"
+        },
+        {
+          "size": "normal",
+          "icon": "UX",
+          "title": "Portal layanan warga",
+          "text": "Formulir yang singkat, status permohonan yang jelas, dan notifikasi lewat WhatsApp atau email.",
+          "tag": "layanan"
+        },
+        {
+          "size": "normal",
+          "icon": "KPI",
+          "title": "Dashboard pimpinan",
+          "text": "Angka layanan harian yang bisa dibaca dalam satu menit, tanpa menunggu laporan bulanan.",
+          "tag": "data"
+        },
+        {
+          "size": "normal",
+          "icon": "24/7",
+          "title": "Pendampingan operasional",
+          "text": "Tim kami tetap siaga setelah serah terima, dengan target waktu respons yang tertulis di kontrak.",
+          "tag": "operasional"
+        }
+      ]
+    },
+    {
+      "type": "stats",
+      "id": "dampak",
+      "title": "Dampak yang bisa diukur sejak bulan pertama.",
+      "lead": "Angka di bawah adalah contoh format. Ganti dengan hasil proyek Anda yang sudah terverifikasi.",
+      "items": [
+        {
+          "value": "38",
+          "suffix": "%",
+          "label": "contoh penurunan waktu antre"
+        },
+        {
+          "value": "12",
+          "label": "contoh sistem yang terintegrasi"
+        },
+        {
+          "value": "99.9",
+          "suffix": "%",
+          "label": "contoh target ketersediaan layanan"
+        },
+        {
+          "value": "0",
+          "label": "contoh temuan kritis saat audit akhir"
+        }
+      ]
+    },
+    {
+      "type": "testimonials",
+      "id": "cerita",
+      "alt": true,
+      "eyebrow": "Contoh testimoni",
+      "title": "Kata mereka yang sudah menjalaninya.",
+      "items": [
+        {
+          "featured": true,
+          "quote": "Yang paling terasa bukan aplikasinya, tapi petugas kami tidak lagi mengetik data yang sama di tiga sistem berbeda.",
+          "name": "Contoh: Kepala Bidang Layanan",
+          "role": "Dinas Perizinan",
+          "initials": "KB"
+        },
+        {
+          "quote": "Dokumentasinya rapi sehingga tim auditor tidak perlu bolak-balik meminta data.",
+          "name": "Contoh: Inspektur",
+          "role": "Inspektorat Daerah",
+          "initials": "IN"
+        },
+        {
+          "quote": "Rilis per dua minggu membuat kami bisa mengoreksi arah sebelum terlambat.",
+          "name": "Contoh: Kepala Seksi TI",
+          "role": "Rumah Sakit Daerah",
+          "initials": "KT"
+        }
+      ]
+    },
+    {
+      "type": "faq",
+      "id": "tanya",
+      "eyebrow": "Tanya jawab",
+      "title": "Sebelum Anda menghubungi kami.",
+      "items": [
+        {
+          "q": "Apakah sistem lama harus diganti?",
+          "a": "Tidak selalu. Kami mulai dengan menghubungkan sistem yang ada, lalu mengganti hanya bagian yang benar-benar menghambat."
+        },
+        {
+          "q": "Bagaimana dengan keamanan data warga?",
+          "a": "Data sensitif dienkripsi, akses dicatat, dan setiap rilis melewati review keamanan sebelum masuk produksi."
+        },
+        {
+          "q": "Apakah bisa mengikuti proses pengadaan pemerintah?",
+          "a": "Bisa. Kami terbiasa menyiapkan dokumen penawaran, rencana kerja, dan laporan sesuai kebutuhan pengadaan."
+        },
+        {
+          "q": "Berapa lama satu proyek berjalan?",
+          "a": "Umumnya tiga sampai enam bulan, tergantung jumlah sistem yang diintegrasikan dan kesiapan data."
+        }
+      ]
+    },
+    {
+      "type": "cta",
+      "id": "kontak",
+      "title": "Mulai dari satu layanan yang *paling sering dikeluhkan*.",
+      "text": "Konsultasi awal 45 menit tanpa biaya. Kami pulang dengan peta masalah, Anda pulang dengan langkah pertama yang jelas.",
+      "primary_label": "Jadwalkan konsultasi",
+      "primary_href": "mailto:halo@contoh.id",
+      "secondary_label": "Unduh profil perusahaan",
+      "secondary_href": "#"
+    },
+    {
+      "type": "footer",
+      "tagline": "Konsultan integrasi sistem untuk instansi dan BUMD.",
+      "columns": [
+        {
+          "heading": "Layanan",
+          "links": [
+            {
+              "label": "Integrasi data",
+              "href": "#layanan"
+            },
+            {
+              "label": "Audit keamanan",
+              "href": "#layanan"
+            },
+            {
+              "label": "Portal warga",
+              "href": "#layanan"
+            }
+          ]
+        },
+        {
+          "heading": "Perusahaan",
+          "links": [
+            {
+              "label": "Pendekatan",
+              "href": "#pendekatan"
+            },
+            {
+              "label": "Karier",
+              "href": "#"
+            },
+            {
+              "label": "Kontak",
+              "href": "mailto:halo@contoh.id"
+            }
+          ]
+        },
+        {
+          "heading": "Legal",
+          "links": [
+            {
+              "label": "Kebijakan privasi",
+              "href": "#"
+            },
+            {
+              "label": "Syarat layanan",
+              "href": "#"
+            }
+          ]
+        }
+      ],
+      "copyright": "© 2026 Arunika Integrasi (contoh)",
+      "note": "Jakarta, Indonesia"
+    }
+  ]
+}

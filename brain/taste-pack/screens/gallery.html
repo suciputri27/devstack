@@ -1,0 +1,153 @@
+{{> partials/shell-start}}
+<div class="stack">
+  <section class="card" aria-labelledby="g-buttons">
+    <h2 class="card__title" id="g-buttons">Tombol</h2>
+    <p class="card__desc">Satu tombol primary per area. Aksi berbahaya selalu merah dan butuh konfirmasi.</p>
+    <span class="gallery-label">Varian</span>
+    <div class="btn-group">
+      <button class="btn btn--primary" type="button">Simpan</button>
+      <button class="btn btn--secondary" type="button">Simpan draf</button>
+      <button class="btn btn--ghost" type="button">Batal</button>
+      <button class="btn btn--quiet" type="button">Lewati</button>
+      <button class="btn btn--danger" type="button">Hapus data</button>
+    </div>
+    <span class="gallery-label">State</span>
+    <div class="btn-group">
+      <button class="btn btn--primary" type="button" data-loading-demo>Klik untuk loading</button>
+      <button class="btn btn--secondary" type="button" data-loading-demo>Loading sekunder</button>
+      <button class="btn btn--primary" type="button" disabled>Nonaktif</button>
+      <button class="btn btn--secondary btn--icon" type="button" aria-label="Unduh"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v12M7 11l5 5 5-5M4 20h16"/></svg></button>
+      <button class="btn btn--secondary" type="button" data-toast="Perubahan disimpan">Tampilkan toast</button>
+      <button class="btn btn--secondary" type="button" data-toast="Gagal terhubung ke server. Coba lagi." data-toast-kind="danger">Toast gagal</button>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="g-inputs">
+    <h2 class="card__title" id="g-inputs">Isian teks</h2>
+    <p class="card__desc">Label selalu di atas, petunjuk di bawah label, pesan error muncul di tempat yang sama.</p>
+    <div class="form-grid">
+      <div class="field">
+        <label class="field__label" for="g-name"><span data-label-text>Nama lengkap</span></label>
+        <input class="input" id="g-name" type="text" placeholder="Sesuai KTP" autocomplete="name">
+      </div>
+      <div class="field">
+        <label class="field__label" for="g-email"><span data-label-text>Email kantor</span></label>
+        <div class="input-group"><input class="input" id="g-email" type="email" placeholder="nama"><span class="input-group__addon">@kantor.go.id</span></div>
+      </div>
+      <div class="field is-invalid">
+        <label class="field__label" for="g-nip"><span data-label-text>NIP</span></label>
+        <input class="input" id="g-nip" type="text" value="1987" aria-invalid="true" aria-describedby="g-nip-err">
+        <p class="field__error" id="g-nip-err"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>NIP terdiri dari 18 digit angka.</p>
+      </div>
+      <div class="field">
+        <label class="field__label" for="g-salary"><span data-label-text>Gaji pokok</span></label>
+        <div class="input-group"><span class="input-group__addon">Rp</span><input class="input" id="g-salary" type="text" inputmode="numeric" placeholder="0"></div>
+      </div>
+      <div class="field span-2">
+        <label class="field__label" for="g-note"><span data-label-text>Catatan</span></label>
+        <p class="field__hint" id="g-note-hint">Tulis singkat, maksimal 280 karakter.</p>
+        <textarea class="textarea" id="g-note" maxlength="280" aria-describedby="g-note-hint" placeholder="Contoh: pindah dari unit Keuangan per 1 Desember"></textarea>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="g-select">
+    <h2 class="card__title" id="g-select">Select dan tanggal</h2>
+    <p class="card__desc">Bukan select bawaan browser. Bisa dicari, mendukung grup, keyboard, dan tetap terkirim sebagai select biasa.</p>
+    <div class="form-grid">
+      <div class="field">
+        <label class="field__label" for="g-unit"><span data-label-text>Unit kerja</span></label>
+        <select id="g-unit" name="unit" data-ui="select" data-placeholder="Pilih unit kerja">
+          <option value=""></option>
+          <optgroup label="Sekretariat">
+            <option value="umum">Bagian Umum</option>
+            <option value="keuangan">Bagian Keuangan</option>
+            <option value="kepegawaian" data-desc="Termasuk diklat dan mutasi">Bagian Kepegawaian</option>
+          </optgroup>
+          <optgroup label="Bidang">
+            <option value="layanan">Bidang Pelayanan</option>
+            <option value="data">Bidang Data dan Informasi</option>
+            <option value="perencanaan">Bidang Perencanaan</option>
+            <option value="pengawasan">Bidang Pengawasan</option>
+            <option value="arsip" disabled>Bidang Arsip (dibekukan)</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field__label" for="g-status"><span data-label-text>Status</span></label>
+        <select id="g-status" name="status" data-ui="select">
+          <option value="aktif" selected>Aktif</option>
+          <option value="cuti">Cuti</option>
+          <option value="nonaktif">Nonaktif</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field__label" for="g-skills"><span data-label-text>Keahlian</span></label>
+        <p class="field__hint">Ketik untuk mencari. Backspace menghapus pilihan terakhir.</p>
+        <select id="g-skills" name="skills" multiple data-ui="multiselect" data-placeholder="Cari keahlian">
+          <option value="php" selected>PHP</option>
+          <option value="laravel" selected>Laravel</option>
+          <option value="ci3">CodeIgniter 3</option>
+          <option value="pgsql">PostgreSQL</option>
+          <option value="mysql">MySQL</option>
+          <option value="js">JavaScript</option>
+          <option value="ux">Desain UX</option>
+          <option value="data">Analisis data</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field__label" for="g-date"><span data-label-text>Tanggal mulai</span></label>
+        <p class="field__hint">Ketik 17/08/2026 atau pilih dari kalender.</p>
+        <input id="g-date" name="start_date" type="date" data-ui="date" value="2026-11-13" min="2026-01-01" max="2027-12-31">
+      </div>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="g-upload">
+    <h2 class="card__title" id="g-upload">Unggah file</h2>
+    <p class="card__desc">Tarik dan lepas, pratinjau gambar, validasi jenis dan ukuran sebelum dikirim.</p>
+    <div class="form-grid">
+      <div class="field">
+        <span class="field__label" id="g-photo-label"><span data-label-text>Pas foto</span></span>
+        <input id="g-photo" name="photo" type="file" accept="image/jpeg,image/png" data-ui="upload" data-max-mb="2" data-hint="JPG atau PNG, maks. 2 MB" aria-labelledby="g-photo-label">
+      </div>
+      <div class="field">
+        <span class="field__label" id="g-docs-label"><span data-label-text>Dokumen pendukung</span></span>
+        <input id="g-docs" name="documents[]" type="file" multiple accept=".pdf,.docx,image/*" data-ui="upload" data-max-mb="5" data-max-files="5" aria-labelledby="g-docs-label">
+      </div>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="g-choice">
+    <h2 class="card__title" id="g-choice">Pilihan</h2>
+    <p class="card__desc">Kartu pilihan untuk keputusan penting, switch untuk pengaturan yang langsung berlaku.</p>
+    <span class="gallery-label">Kartu pilihan</span>
+    <fieldset class="choices">
+      <legend class="sr-only">Jenis kepegawaian</legend>
+      <label class="choice"><input type="radio" name="g-type" value="pns" checked><span class="choice__title">PNS</span><span class="choice__desc">Pegawai negeri sipil dengan NIP.</span></label>
+      <label class="choice"><input type="radio" name="g-type" value="pppk"><span class="choice__title">PPPK</span><span class="choice__desc">Kontrak kerja dengan masa perjanjian.</span></label>
+      <label class="choice"><input type="radio" name="g-type" value="honorer"><span class="choice__title">Non ASN</span><span class="choice__desc">Tenaga pendukung atau outsourcing.</span></label>
+    </fieldset>
+    <span class="gallery-label">Switch, checkbox, segmented</span>
+    <div class="row row--loose">
+      <label class="switch"><input type="checkbox" checked><span class="switch__track" aria-hidden="true"></span><span class="switch__text">Notifikasi email<small>Kirim ringkasan harian</small></span></label>
+      <label class="check"><input type="checkbox" checked><span>Tampilkan di direktori</span></label>
+      <label class="check"><input type="radio" name="g-r" checked><span>Laki-laki</span></label>
+      <label class="check"><input type="radio" name="g-r"><span>Perempuan</span></label>
+      <div class="segmented" role="radiogroup" aria-label="Periode">
+        <label><input type="radio" name="g-period" checked><span>Harian</span></label>
+        <label><input type="radio" name="g-period"><span>Mingguan</span></label>
+        <label><input type="radio" name="g-period"><span>Bulanan</span></label>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="g-notice">
+    <h2 class="card__title" id="g-notice">Pemberitahuan</h2>
+    <div class="stack stack--tight">
+      <div class="notice notice--info"><span class="notice__icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg></span><div><p class="notice__title">Data sinkron dari SIASN</p><p class="notice__text">Perubahan golongan akan tampil setelah sinkronisasi pukul 02.00.</p></div><span></span></div>
+      <div class="notice notice--warning"><span class="notice__icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg></span><div><p class="notice__title">12 pegawai belum melengkapi berkas</p><p class="notice__text">Batas akhir unggah 30 November 2026.</p></div><div class="notice__actions"><button class="btn btn--secondary btn--sm" type="button">Lihat daftar</button></div></div>
+    </div>
+  </section>
+</div>
+{{> partials/shell-end}}

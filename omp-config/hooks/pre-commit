@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+gate="${DEVSTACK_GATE:-block}"
+skip='^(vendor|node_modules|storage|\.claude|\.agents|\.omp|_bmad|\.bmad-core|\.taste|public/assets/taste|bootstrap/cache)/'
+
+files=$(git diff --cached --name-only --diff-filter=ACM | grep -Ev "$skip" || true)
+[ -z "$files" ] && exit 0
+
+fail() {
+  if [ "$gate" = "warn" ]; then
+    echo "WARN: $1 (DEVSTACK_GATE=warn, commit tetap jalan)"
+  else
+    echo "BLOCK: $1"
+    exit 1
+  fi
+}
+
+if echo "$files" | xargs -r env LC_ALL=C grep -nE $'\xe2\x80[\x93\x94]' 2>/dev/null; then
+  fail "em dash atau en dash ditemukan"
+fi
+
+php_bin="${PHP_BIN:-php}"
+for f in $(echo "$files" | grep '\.php$' || true); do
+  "$php_bin" -l "$f" >/dev/null || fail "syntax error di $f"
+done
+
+ui=$(echo "$files" | grep -E '\.(blade\.php|html|css|scss|vue|jsx|tsx)$|/views/' || true)
+if [ -n "$ui" ] && command -v taste >/dev/null && { [ -f DESIGN.md ] || [ -f .taste/taste.json ]; }; then
+  # shellcheck disable=SC2086
+  taste lint $ui || fail "taste lint menemukan nilai di luar token"
+fi
+
+if command -v devstack-audit >/dev/null; then
+  devstack-audit --staged --fail-on error || fail "devstack-audit menemukan masalah keamanan (lihat .ai/security/phase1.md)"
+fi

@@ -1,0 +1,7 @@
+.env
+*.env
+.mcp.json
+*.db
+*.sqlite
+sessions/
+logs/

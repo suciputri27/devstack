@@ -1,0 +1,23 @@
+{
+  "kind": "app",
+  "preset": "clean-corporate",
+  "lang": "id",
+  "screen": "screens/gallery.html",
+  "include_data": [
+    "app-shell.json"
+  ],
+  "title": "Galeri komponen - Sigap",
+  "description": "Referensi komponen form dan tombol",
+  "active": "komponen",
+  "page_title": "Galeri komponen",
+  "page_desc": "Semua komponen form yang dipakai di aplikasi. Salin markup dari sini.",
+  "breadcrumb": [
+    {
+      "label": "Sistem",
+      "href": "#"
+    },
+    {
+      "label": "Galeri komponen"
+    }
+  ]
+}

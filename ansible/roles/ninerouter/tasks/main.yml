@@ -1,0 +1,71 @@
+- name: Izinkan bind ke SERVER_IP walau interface belum naik saat boot
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_nonlocal_bind
+    value: "1"
+    sysctl_file: /etc/sysctl.d/90-devstack.conf
+    reload: true
+
+- name: Folder 9Router
+  ansible.builtin.file:
+    path: "{{ ninerouter_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Cek secret 9Router
+  ansible.builtin.stat:
+    path: "{{ ninerouter_dir }}/.env"
+  register: nr_env
+
+- name: Buat secret 9Router (sekali saja, tidak pernah ditimpa)
+  ansible.builtin.template:
+    src: env.j2
+    dest: "{{ ninerouter_dir }}/.env"
+    owner: root
+    group: root
+    mode: "0600"
+  vars:
+    nr_jwt_secret: "{{ lookup('password', '/dev/null chars=hexdigits length=64') }}"
+    nr_api_key_secret: "{{ lookup('password', '/dev/null chars=hexdigits length=64') }}"
+    nr_machine_salt: "{{ lookup('password', '/dev/null chars=hexdigits length=32') }}"
+    nr_initial_password: "{{ lookup('password', '/dev/null chars=ascii_letters,digits length=24') }}"
+  when: not nr_env.stat.exists
+  no_log: true
+
+- name: docker-compose.yml 9Router
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ ninerouter_dir }}/docker-compose.yml"
+    owner: root
+    group: root
+    mode: "0640"
+  register: nr_compose
+
+- name: Jalankan 9Router
+  ansible.builtin.command: docker compose up -d --remove-orphans
+  args:
+    chdir: "{{ ninerouter_dir }}"
+  register: nr_up
+  changed_when: "'Started' in nr_up.stderr or 'Recreated' in nr_up.stderr or 'Created' in nr_up.stderr"
+
+- name: Tunggu 9Router siap
+  ansible.builtin.wait_for:
+    host: "{{ server_ip }}"
+    port: "{{ ninerouter_port }}"
+    timeout: 120
+
+- name: Skrip backup 9Router
+  ansible.builtin.copy:
+    dest: /usr/local/bin/devstack-backup-9router
+    mode: "0750"
+    owner: root
+    group: root
+    content: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+      out="${1:-/root/backup}"
+      mkdir -p "$out" && chmod 700 "$out"
+      file="$out/9router-$(date +%F-%H%M).tgz.gpg"
+      tar -C {{ ninerouter_dir }} -czf - data .env | gpg --symmetric --cipher-algo AES256 -o "$file"
+      echo "Backup terenkripsi: $file"

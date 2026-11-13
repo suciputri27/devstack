@@ -1,0 +1,13 @@
+providers:
+  nr:
+    baseUrl: http://{{ server_ip }}:{{ ninerouter_port }}/v1
+    api: openai-completions
+    apiKey: NINEROUTER_API_KEY
+    authHeader: true
+    models:
+      - id: code-main
+      - id: code-heavy
+      - id: code-design
+      - id: code-vision
+      - id: code-review
+      - id: code-fast

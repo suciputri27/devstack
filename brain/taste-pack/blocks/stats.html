@@ -1,0 +1,16 @@
+<section class="section {{#alt}}section--alt{{/alt}}" id="{{id}}">
+  <div class="container">
+    <div class="section__head section__head--split">
+      <h2 class="title">{{title}}</h2>
+      {{#lead}}<p class="lead">{{lead}}</p>{{/lead}}
+    </div>
+    <dl class="stats">
+      {{#items}}<div class="stats__item" data-reveal>
+        <dt class="stats__label">{{label}}</dt>
+        <dd class="stats__value" data-count="{{value}}" data-prefix="{{prefix}}" data-suffix="{{suffix}}">{{prefix}}{{display}}{{suffix}}</dd>
+      </div>
+      {{/items}}
+    </dl>
+    {{#note}}<p class="stats__note">{{note}}</p>{{/note}}
+  </div>
+</section>

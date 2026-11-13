@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+set -uo pipefail
+
+CONF=/etc/devstack.conf
+[ -r "$CONF" ] || { echo "Tidak menemukan $CONF. Jalankan installer dulu."; exit 2; }
+# shellcheck disable=SC1090
+. "$CONF"
+
+FULL=false
+[ "${1:-}" = "--full" ] && FULL=true
+
+printf 'devstack %s\n' "${DEVSTACK_VERSION:-sebelum 0.5.0}"
+
+pass=0; warn=0; fail=0
+ok()   { printf '  [ OK ]  %s\n' "$*"; pass=$((pass + 1)); }
+wr()   { printf '  [WARN]  %s\n' "$*"; warn=$((warn + 1)); }
+bad()  { printf '  [FAIL]  %s\n' "$*"; fail=$((fail + 1)); }
+head_() { printf '\n%s\n' "$*"; }
+
+as_root() {
+  if [ "$(id -u)" -eq 0 ]; then "$@"; else sudo -n "$@" 2>/dev/null; fi
+}
+
+target_home=$(getent passwd "$DEVSTACK_USER" | cut -d: -f6)
+omp_env="$target_home/.omp/agent/.env"
+HOME_LABEL="$target_home"
+nr_url="http://$SERVER_IP:$NINEROUTER_PORT"
+
+head_ "Keamanan server"
+if sshd_out=$(as_root sshd -T 2>/dev/null); then
+  grep -qi '^passwordauthentication no' <<<"$sshd_out" && ok "SSH tanpa password" || bad "SSH masih menerima password"
+  grep -qi '^permitrootlogin no' <<<"$sshd_out" && ok "Login root via SSH dimatikan" || bad "Login root via SSH masih aktif"
+else
+  wr "Lewati cek sshd (jalankan dengan sudo untuk cek lengkap)"
+fi
+drop_ins=$(as_root grep -rliE '^[[:space:]]*(PasswordAuthentication|PermitRootLogin)[[:space:]]+yes' /etc/ssh/sshd_config.d/ 2>/dev/null || true)
+if [ -n "$drop_ins" ]; then
+  bad "File SSH yang membuka login password/root masih ada: $drop_ins (hapus, lalu systemctl restart ssh)"
+fi
+if ufw_out=$(as_root ufw status 2>/dev/null); then
+  grep -q 'Status: active' <<<"$ufw_out" && ok "Firewall aktif" || bad "Firewall tidak aktif"
+  for net in $ALLOWED_SUBNETS; do
+    grep -q "$net" <<<"$ufw_out" && ok "Aturan firewall untuk $net ada" || bad "Aturan firewall untuk $net tidak ditemukan"
+  done
+  if [ "$SSH_RESTRICTED" = "true" ] && grep -E '^22(/tcp)?\s+(ALLOW|LIMIT)\s+Anywhere' <<<"$ufw_out" >/dev/null; then
+    bad "SSH masih terbuka ke semua alamat padahal SSH_RESTRICTED=true"
+  fi
+else
+  wr "Lewati cek firewall (jalankan dengan sudo untuk cek lengkap)"
+fi
+ip -o addr show | grep -q " $SERVER_IP/" && ok "SERVER_IP $SERVER_IP ada di interface" || bad "SERVER_IP $SERVER_IP tidak ada di interface (IP server berubah?)"
+
+head_ "Layanan"
+if docker ps --format '{{.Names}}' 2>/dev/null | grep -qx 9router; then ok "Container 9router berjalan"; else bad "Container 9router tidak berjalan (cd /opt/9router && sudo docker compose up -d)"; fi
+code=$(curl -s -o /dev/null -m 5 -w '%{http_code}' "$nr_url/v1/models")
+[ "$code" = "401" ] && ok "9Router menolak request tanpa key (401)" || bad "9Router tanpa key mengembalikan $code, harusnya 401"
+
+nr_key=""
+[ -r "$omp_env" ] && nr_key=$(grep -E '^NINEROUTER_API_KEY=' "$omp_env" | cut -d= -f2-)
+if [ -n "$nr_key" ]; then
+  models=$(curl -s -m 10 -H "Authorization: Bearer $nr_key" "$nr_url/v1/models")
+  if ids=$(jq -r '.data[].id' <<<"$models" 2>/dev/null) && [ -n "$ids" ]; then
+    ok "9Router menerima key OMP"
+    for combo in code-main code-heavy code-design code-vision code-review code-fast; do
+      grep -qx "$combo" <<<"$ids" && ok "Combo $combo tersedia" || wr "Combo $combo belum dibuat di dashboard 9Router"
+    done
+  else
+    bad "Key di $omp_env ditolak atau respons tidak valid"
+  fi
+else
+  wr "NINEROUTER_API_KEY di $omp_env masih kosong"
+fi
+
+if [ "$SEARXNG_ENABLED" = "true" ]; then
+  code=$(curl -s -o /dev/null -m 10 -w '%{http_code}' "http://$SERVER_IP:$SEARXNG_PORT/search?q=laravel&format=json")
+  [ "$code" = "200" ] && ok "SearXNG menjawab format JSON" || bad "SearXNG mengembalikan $code"
+fi
+
+head_ "Toolchain (user $DEVSTACK_USER)"
+run_user() {
+  if [ "$(id -un)" = "$DEVSTACK_USER" ]; then
+    bash -c "$1"
+  elif [ "$(id -u)" -eq 0 ]; then
+    runuser -u "$DEVSTACK_USER" -- bash -c "cd ~ && $1"
+  else
+    sudo -n -u "$DEVSTACK_USER" bash -c "cd ~ && $1"
+  fi
+}
+for tool in php composer node npm bun uv omp gh docker rg fd intelephense uipro; do
+  if run_user "export PATH=\$HOME/.local/bin:\$HOME/.bun/bin:\$PATH; command -v $tool" >/dev/null 2>&1; then ok "$tool"; else bad "$tool tidak ditemukan"; fi
+done
+
+head_ "Konfigurasi OMP"
+for item in AGENTS.md BACKEND.md config.yml models.yml mcp.json skills agents; do
+  [ -L "$target_home/.omp/agent/$item" ] && ok "$HOME_LABEL/.omp/agent/$item ter-symlink ke omp-config" || bad "$HOME_LABEL/.omp/agent/$item bukan symlink (jalankan ~/omp-config/install.sh)"
+done
+if [ -e "$omp_env" ]; then
+  perm=$(stat -c '%a' "$omp_env")
+  [ "$perm" = "600" ] && ok ".env OMP berizin 600" || bad ".env OMP berizin $perm, harusnya 600"
+fi
+
+head_ "Otak devstack (UI, keamanan, memori)"
+brain=/opt/devstack
+for part in taste-pack audit memory; do
+  [ -d "$brain/$part" ] && ok "$brain/$part terpasang" || bad "$brain/$part tidak ada (jalankan installer v0.5.0)"
+done
+for cmd in taste devstack-audit lessons devstack-verify devstack-sync-config semgrep; do
+  command -v "$cmd" >/dev/null && ok "perintah $cmd" || bad "perintah $cmd tidak ditemukan"
+done
+if [ -x "$brain/venv/bin/python" ]; then
+  "$brain/venv/bin/python" -c "import playwright" 2>/dev/null && ok "Playwright Python untuk taste check dan review" || bad "Playwright Python tidak terpasang di $brain/venv"
+  semgrep --version >/dev/null 2>&1 && ok "Semgrep berjalan ($(semgrep --version 2>/dev/null | tail -n 1))" || bad "Semgrep tidak bisa dijalankan"
+else
+  bad "Virtualenv $brain/venv tidak ada"
+fi
+if run_user "ls \$HOME/.cache/ms-playwright 2>/dev/null | grep -q chromium"; then ok "Chromium untuk Playwright ($DEVSTACK_USER)"; else wr "Chromium Playwright belum ada untuk $DEVSTACK_USER"; fi
+if [ -d "$target_home/omp-config/.git" ]; then
+  last=$(run_user "git -C ~/omp-config log -1 --format='%s (%cr)'" 2>/dev/null)
+  ok "omp-config git: $last"
+fi
+
+if [ -n "${TEAM_USERS:-}" ]; then
+  head_ "Anggota tim"
+  for u in $TEAM_USERS; do
+    h=$(getent passwd "$u" | cut -d: -f6)
+    if [ -z "$h" ]; then bad "User $u belum ada"; continue; fi
+    if ! as_root test -d "$h"; then wr "$u: lewati (jalankan dengan sudo untuk cek anggota tim)"; continue; fi
+    as_root test -L "$h/.omp/agent/AGENTS.md" && ok "$u: konfigurasi OMP ter-symlink" || bad "$u: konfigurasi OMP belum ter-symlink"
+    k=$(as_root grep -E '^NINEROUTER_API_KEY=' "$h/.omp/agent/.env" 2>/dev/null | cut -d= -f2-)
+    [ -n "$k" ] && ok "$u: key 9Router sudah diisi" || wr "$u: NINEROUTER_API_KEY masih kosong"
+  done
+fi
+
+if $FULL; then
+  head_ "Uji agent (--full)"
+  if [ -z "$nr_key" ]; then
+    wr "Lewati: NINEROUTER_API_KEY kosong"
+  else
+    out=$(run_user "export PATH=\$HOME/.bun/bin:\$PATH; cd /tmp && timeout 120 omp -p --model nr/code-main 'Reply with exactly: OK'" 2>&1 | tail -n 1)
+    [ "$(echo "$out" | tr -d '[:space:]')" = "OK" ] && ok "OMP menjawab lewat 9Router" || bad "OMP tidak menjawab OK: $out"
+  fi
+fi
+
+printf '\nHasil: %d OK, %d WARN, %d FAIL\n' "$pass" "$warn" "$fail"
+[ "$fail" -eq 0 ]

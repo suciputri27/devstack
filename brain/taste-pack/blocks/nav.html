@@ -1,0 +1,12 @@
+<a class="skip-link" href="#main">{{skip_label}}</a>
+<header class="nav" data-nav>
+  <div class="container nav__inner">
+    <a class="nav__brand" href="#top"><span class="nav__mark" aria-hidden="true">{{mark}}</span>{{brand}}</a>
+    <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="nav-menu" data-nav-toggle><span class="sr-only">{{menu_label}}</span><span class="nav__bars" aria-hidden="true"></span></button>
+    <nav class="nav__menu" id="nav-menu" aria-label="{{menu_label}}">
+      {{#links}}<a href="{{href}}">{{label}}</a>
+      {{/links}}<a class="btn btn--primary btn--sm" href="{{cta_href}}">{{cta_label}}</a>
+    </nav>
+  </div>
+</header>
+<main id="main">

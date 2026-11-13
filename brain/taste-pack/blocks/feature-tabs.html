@@ -1,0 +1,27 @@
+<section class="section {{#alt}}section--alt{{/alt}}" id="{{id}}">
+  <div class="container">
+    <div class="section__head">
+      <span class="eyebrow">{{eyebrow}}</span>
+      <h2 class="title">{{title}}</h2>
+      {{#lead}}<p class="lead">{{lead}}</p>{{/lead}}
+    </div>
+    <div class="tabs" data-tabs>
+      <div class="tabs__list" role="tablist" aria-label="{{title_plain}}">
+        {{#items}}<button class="tabs__tab" type="button" role="tab" id="{{id}}-tab-{{_i}}" aria-controls="{{id}}-panel-{{_i}}" aria-selected="{{#_first}}true{{/_first}}{{^_first}}false{{/_first}}" tabindex="{{#_first}}0{{/_first}}{{^_first}}-1{{/_first}}">{{label}}</button>
+        {{/items}}
+      </div>
+      {{#items}}<div class="tabs__panel" role="tabpanel" id="{{id}}-panel-{{_i}}" aria-labelledby="{{id}}-tab-{{_i}}" {{^_first}}hidden{{/_first}}>
+        <div class="tabs__copy">
+          <h3 class="tabs__title">{{title}}</h3>
+          <p class="tabs__text">{{text}}</p>
+          <ul class="checklist">{{#points}}<li>{{.}}</li>{{/points}}</ul>
+        </div>
+        <figure class="codecard">
+          <figcaption class="codecard__head"><span>{{file}}</span><span class="codecard__status">{{status}}</span></figcaption>
+          <pre class="codecard__body">{{code}}</pre>
+        </figure>
+      </div>
+      {{/items}}
+    </div>
+  </div>
+</section>

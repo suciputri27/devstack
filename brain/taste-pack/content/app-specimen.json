@@ -1,0 +1,13 @@
+{
+  "kind": "app",
+  "preset": "clean-corporate",
+  "lang": "id",
+  "screen": "screens/specimen.html",
+  "include_data": ["app-shell.json"],
+  "active": "pegawai",
+  "title": "Pratinjau gaya",
+  "description": "Pratinjau satu layar untuk membandingkan arah visual",
+  "page_title": "Data pegawai",
+  "page_desc": "Contoh layar untuk menilai warna, huruf, dan kepadatan.",
+  "breadcrumb": [{ "label": "Pegawai", "href": "#" }, { "label": "Ubah data" }]
+}

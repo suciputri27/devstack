@@ -1,0 +1,56 @@
+{{> partials/shell-start}}
+<div class="stack">
+  <form class="card" data-ui="form" data-demo action="#" method="post">
+    <div class="form-grid">
+      <div class="field">
+        <label class="field__label" for="sp-name"><span data-label-text>Nama lengkap<span class="field__req" aria-hidden="true">*</span></span></label>
+        <input class="input" id="sp-name" name="name" type="text" required maxlength="80" value="Rina Kartika">
+      </div>
+      <div class="field">
+        <label class="field__label" for="sp-unit"><span data-label-text>Unit kerja</span></label>
+        <select id="sp-unit" name="unit" data-ui="select">
+          <option value=""></option>
+          <option value="umum" selected>Bagian Umum</option>
+          <option value="keuangan">Bagian Keuangan</option>
+          <option value="layanan">Bidang Pelayanan</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field__label" for="sp-skills"><span data-label-text>Kompetensi</span></label>
+        <select id="sp-skills" name="skills[]" multiple data-ui="multiselect">
+          <option value="a" selected>Kearsipan</option>
+          <option value="b" selected>Pengadaan</option>
+          <option value="c">Statistik</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field__label" for="sp-date"><span data-label-text>Tanggal mulai</span></label>
+        <input id="sp-date" name="start" type="date" data-ui="date" value="2026-11-13">
+      </div>
+      <div class="field is-invalid">
+        <label class="field__label" for="sp-nik"><span data-label-text>NIK</span></label>
+        <input class="input" id="sp-nik" name="nik" type="text" value="3175" aria-invalid="true" aria-describedby="sp-nik-err">
+        <p class="field__error" id="sp-nik-err"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>NIK terdiri dari 16 digit angka.</p>
+      </div>
+      <div class="field">
+        <span class="field__label">Notifikasi</span>
+        <label class="switch"><input type="checkbox" checked><span class="switch__track" aria-hidden="true"></span><span class="switch__text">Kirim ringkasan harian</span></label>
+      </div>
+    </div>
+    <fieldset class="choices">
+      <legend class="field__label choices__legend">Jenis kepegawaian</legend>
+      <label class="choice"><input type="radio" name="sp-type" checked><span class="choice__title">PNS</span><span class="choice__desc">Memiliki NIP 18 digit.</span></label>
+      <label class="choice"><input type="radio" name="sp-type"><span class="choice__title">PPPK</span><span class="choice__desc">Dengan masa perjanjian kerja.</span></label>
+      <label class="choice"><input type="radio" name="sp-type"><span class="choice__title">Non ASN</span><span class="choice__desc">Tenaga pendukung.</span></label>
+    </fieldset>
+    <div class="form-actions" data-state="saved">
+      <span class="form-actions__status"><span class="form-actions__dot" aria-hidden="true"></span><span class="form-actions__text">Draf tersimpan otomatis</span></span>
+      <div class="form-actions__buttons">
+        <button class="btn btn--quiet" type="button">Batal</button>
+        <button class="btn btn--secondary" type="button">Simpan dan tambah lagi</button>
+        <button class="btn btn--primary" type="button">Simpan</button>
+      </div>
+    </div>
+  </form>
+</div>
+{{> partials/shell-end}}

@@ -1,0 +1,20 @@
+services:
+  9router:
+    image: {{ ninerouter_image }}:{{ ninerouter_tag }}
+    container_name: 9router
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      PORT: "{{ ninerouter_port }}"
+      HOSTNAME: "0.0.0.0"
+      DATA_DIR: /app/data
+      REQUIRE_API_KEY: "true"
+    ports:
+      - "{{ server_ip }}:{{ ninerouter_port }}:{{ ninerouter_port }}"
+    volumes:
+      - ./data:/app/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

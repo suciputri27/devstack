@@ -1,0 +1,71 @@
+{
+  "bold-tech": {
+    "label": "Bold Tech",
+    "use_for": "Produk teknologi, SaaS, developer tools, startup",
+    "theme_color": "#13161c",
+    "tags": { "product": ["saas", "landing", "data"], "users": ["teknis", "profesional"], "mood": ["berani"], "mode": "dark", "density": "comfortable", "shape": "soft" },
+    "fonts": [
+      { "family": "Bricolage Grotesque", "file": "bricolage-grotesque-latin-wght-normal.woff2", "weight": "200 800", "style": "normal" },
+      { "family": "Geist", "file": "geist-latin-wght-normal.woff2", "weight": "100 900", "style": "normal" },
+      { "family": "Geist Mono", "file": "geist-mono-latin-wght-normal.woff2", "weight": "100 900", "style": "normal" }
+    ]
+  },
+  "clean-corporate": {
+    "label": "Clean Corporate",
+    "use_for": "Korporat, konsultan, layanan profesional",
+    "theme_color": "#fbfaf7",
+    "tags": { "product": ["landing", "panel", "publik"], "users": ["profesional", "publik"], "mood": ["elegan", "tenang"], "mode": "light", "density": "comfortable", "shape": "soft" },
+    "fonts": [
+      { "family": "Instrument Serif", "file": "instrument-serif-latin-400-normal.woff2", "weight": "400", "style": "normal" },
+      { "family": "Instrument Serif", "file": "instrument-serif-latin-400-italic.woff2", "weight": "400", "style": "italic" },
+      { "family": "Public Sans", "file": "public-sans-latin-wght-normal.woff2", "weight": "100 900", "style": "normal" },
+      { "family": "IBM Plex Mono", "file": "ibm-plex-mono-latin-400-normal.woff2", "weight": "400", "style": "normal" },
+      { "family": "IBM Plex Mono", "file": "ibm-plex-mono-latin-500-normal.woff2", "weight": "500", "style": "normal" }
+    ]
+  },
+  "civic": {
+    "label": "Civic",
+    "use_for": "Portal layanan publik, instansi pemerintah, formulir warga",
+    "theme_color": "#fcfdff",
+    "tags": { "product": ["publik", "panel"], "users": ["publik", "internal"], "mood": ["tenang"], "mode": "light", "density": "comfortable", "shape": "soft" },
+    "fonts": [
+      { "family": "Public Sans", "file": "public-sans-latin-wght-normal.woff2", "weight": "100 900", "style": "normal" },
+      { "family": "IBM Plex Mono", "file": "ibm-plex-mono-latin-400-normal.woff2", "weight": "400", "style": "normal" },
+      { "family": "IBM Plex Mono", "file": "ibm-plex-mono-latin-500-normal.woff2", "weight": "500", "style": "normal" }
+    ]
+  },
+  "warm-umkm": {
+    "label": "Warm UMKM",
+    "use_for": "UMKM, toko, kuliner, komunitas, layanan yang ramah",
+    "theme_color": "#faf5ec",
+    "tags": { "product": ["umkm", "landing", "publik"], "users": ["publik"], "mood": ["hangat"], "mode": "light", "density": "comfortable", "shape": "round" },
+    "fonts": [
+      { "family": "Plus Jakarta Sans", "file": "plus-jakarta-sans-latin-wght-normal.woff2", "weight": "200 800", "style": "normal" },
+      { "family": "IBM Plex Mono", "file": "ibm-plex-mono-latin-400-normal.woff2", "weight": "400", "style": "normal" },
+      { "family": "IBM Plex Mono", "file": "ibm-plex-mono-latin-500-normal.woff2", "weight": "500", "style": "normal" }
+    ]
+  },
+  "dashboard-pro": {
+    "label": "Dashboard Pro",
+    "use_for": "Panel admin, sistem internal, dashboard data, back office",
+    "theme_color": "#f8f9fb",
+    "tags": { "product": ["panel", "data", "saas"], "users": ["internal", "profesional", "teknis"], "mood": ["tenang"], "mode": "light", "density": "compact", "shape": "sharp" },
+    "fonts": [
+      { "family": "Geist", "file": "geist-latin-wght-normal.woff2", "weight": "100 900", "style": "normal" },
+      { "family": "Geist Mono", "file": "geist-mono-latin-wght-normal.woff2", "weight": "100 900", "style": "normal" }
+    ]
+  },
+  "editorial-night": {
+    "label": "Editorial Night",
+    "use_for": "Brand premium, agensi, publikasi, produk dengan cerita",
+    "theme_color": "#1b1712",
+    "tags": { "product": ["landing", "saas"], "users": ["profesional"], "mood": ["elegan", "berani"], "mode": "dark", "density": "comfortable", "shape": "sharp" },
+    "fonts": [
+      { "family": "Fraunces", "file": "fraunces-latin-wght-normal.woff2", "weight": "100 900", "style": "normal" },
+      { "family": "Fraunces", "file": "fraunces-latin-wght-italic.woff2", "weight": "100 900", "style": "italic" },
+      { "family": "Public Sans", "file": "public-sans-latin-wght-normal.woff2", "weight": "100 900", "style": "normal" },
+      { "family": "IBM Plex Mono", "file": "ibm-plex-mono-latin-400-normal.woff2", "weight": "400", "style": "normal" },
+      { "family": "IBM Plex Mono", "file": "ibm-plex-mono-latin-500-normal.woff2", "weight": "500", "style": "normal" }
+    ]
+  }
+}

@@ -1,0 +1,44 @@
+name: release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Read version
+        id: v
+        run: echo "tag=v$(cat VERSION)" >> "$GITHUB_OUTPUT"
+      - name: Release notes from CHANGELOG
+        run: |
+          version="${{ steps.v.outputs.tag }}"
+          awk -v v="## ${version#v}" '$0 == v {show=1; next} /^## / && show {exit} show' CHANGELOG.md > notes.md
+          [ -s notes.md ] || echo "devstack ${version#v}" > notes.md
+      - name: Tag and GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="${{ steps.v.outputs.tag }}"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release $tag sudah ada, lewati."
+            exit 0
+          fi
+          if ! git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -a "$tag" -m "devstack ${tag#v}"
+            git push origin "$tag"
+          fi
+          gh release create "$tag" --title "devstack ${tag#v}" --notes-file notes.md --verify-tag

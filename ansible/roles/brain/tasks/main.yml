@@ -1,0 +1,65 @@
+- name: Paket Python venv
+  ansible.builtin.apt:
+    name: [python3-venv, python3-pip, jq]
+    state: present
+
+- name: Folder otak devstack
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: ["{{ brain_dir }}", "{{ brain_dir }}/lib"]
+
+- name: Salin taste pack, audit, dan memory (versi terbaru menggantikan yang lama)
+  ansible.builtin.copy:
+    src: "{{ devstack_root }}/brain/{{ item }}/"
+    dest: "{{ brain_dir }}/{{ item }}/"
+    owner: root
+    group: root
+    mode: u=rwX,go=rX
+  loop: [taste-pack, audit, memory]
+
+- name: Versi devstack
+  ansible.builtin.copy:
+    src: "{{ devstack_root }}/VERSION"
+    dest: "{{ brain_dir }}/VERSION"
+    mode: "0644"
+
+- name: Virtualenv tool devstack
+  ansible.builtin.command: python3 -m venv {{ brain_dir }}/venv
+  args:
+    creates: "{{ brain_dir }}/venv/bin/python"
+
+- name: Semgrep dan Playwright untuk tool devstack
+  ansible.builtin.pip:
+    name:
+      - "semgrep{{ ('==' ~ semgrep_version) if semgrep_version | length > 0 else '' }}"
+      - "playwright{{ ('==' ~ playwright_py_version) if playwright_py_version | length > 0 else '' }}"
+    virtualenv: "{{ brain_dir }}/venv"
+    state: present
+  tags: [net]
+
+- name: Perintah taste, devstack-audit, lessons, devstack-verify
+  ansible.builtin.copy:
+    src: "{{ devstack_root }}/brain/bin/{{ item }}"
+    dest: "/usr/local/bin/{{ item }}"
+    mode: "0755"
+  loop: [taste, devstack-audit, lessons, devstack-verify]
+
+- name: Perintah semgrep tersedia di PATH
+  ansible.builtin.file:
+    src: "{{ brain_dir }}/venv/bin/semgrep"
+    dest: /usr/local/bin/semgrep
+    state: link
+    force: false
+  failed_when: false
+
+- name: Salinan config bawaan untuk devstack-sync-config
+  ansible.builtin.copy:
+    src: "{{ devstack_root }}/omp-config/"
+    dest: "{{ brain_dir }}/omp-config-defaults/"
+    owner: root
+    group: root
+    mode: u=rwX,go=rX

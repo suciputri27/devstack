@@ -1,0 +1,14 @@
+- name: devstack server
+  hosts: devbox
+  become: true
+  gather_facts: true
+  roles:
+    - { role: preflight, tags: [preflight, always] }
+    - { role: base, tags: [base] }
+    - { role: hardening, tags: [hardening] }
+    - { role: toolchain, tags: [toolchain] }
+    - { role: brain, tags: [brain] }
+    - { role: ninerouter, tags: [ninerouter] }
+    - { role: searxng, tags: [searxng], when: enable_searxng | bool }
+    - { role: workspace, tags: [workspace, omp, omp_config] }
+    - { role: finalize, tags: [finalize, always] }

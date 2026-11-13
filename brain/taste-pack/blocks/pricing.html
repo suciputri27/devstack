@@ -1,0 +1,26 @@
+<section class="section {{#alt}}section--alt{{/alt}}" id="{{id}}" data-pricing>
+  <div class="container">
+    <div class="section__head">
+      <span class="eyebrow">{{eyebrow}}</span>
+      <h2 class="title">{{title}}</h2>
+      {{#lead}}<p class="lead">{{lead}}</p>{{/lead}}
+    </div>
+    <div class="pricing__switch" role="group" aria-label="{{switch_label}}">
+      <button class="pricing__option" type="button" data-period="monthly" aria-pressed="true">{{monthly_label}}</button>
+      <button class="pricing__option" type="button" data-period="yearly" aria-pressed="false">{{yearly_label}}{{#yearly_save}}<span class="pricing__save">{{yearly_save}}</span>{{/yearly_save}}</button>
+    </div>
+    <div class="plans">
+      {{#plans}}<article class="plan {{#featured}}plan--featured{{/featured}}" data-reveal>
+        {{#flag}}<span class="plan__flag">{{flag}}</span>{{/flag}}
+        <div>
+          <h3 class="plan__name">{{name}}</h3>
+          <p class="plan__desc">{{desc}}</p>
+        </div>
+        <p class="plan__price"><span class="plan__amount" data-monthly="{{monthly}}" data-yearly="{{yearly}}">{{monthly}}</span><span class="plan__period" data-period-label data-monthly-label="{{monthly_period}}" data-yearly-label="{{yearly_period}}">{{monthly_period}}</span></p>
+        <ul class="checklist">{{#features}}<li>{{.}}</li>{{/features}}</ul>
+        <a class="btn {{#featured}}btn--primary{{/featured}}{{^featured}}btn--ghost{{/featured}}" href="{{cta_href}}">{{cta_label}}</a>
+      </article>
+      {{/plans}}
+    </div>
+  </div>
+</section>

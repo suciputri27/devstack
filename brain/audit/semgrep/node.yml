@@ -1,0 +1,135 @@
+rules:
+  - id: node-sql-template-or-concat
+    message: SQL built from a template literal or concatenation. Use parameterized queries ($1 or ?) or the query builder.
+    severity: ERROR
+    metadata: { area: injection, cwe: "CWE-89" }
+    languages: [generic]
+    paths: { include: ["*.js", "*.ts", "*.mjs", "*.cjs"] }
+    pattern-either:
+      - pattern-regex: |-
+          \.(query|execute|raw|whereRaw|orderByRaw)\(\s*`[^`]*\$\{
+      - pattern-regex: |-
+          \.(query|execute|raw|whereRaw)\(\s*["'][^"']*(SELECT|INSERT|UPDATE|DELETE|WHERE)[^"']*["']\s*\+
+      - pattern-regex: |-
+          \$(queryRawUnsafe|executeRawUnsafe)\(
+      - pattern-regex: |-
+          sequelize\.query\(\s*`[^`]*\$\{
+  - id: node-nosql-injection
+    message: Request data passed straight into a MongoDB query or $where. Validate types and pick fields explicitly.
+    severity: ERROR
+    metadata: { area: injection, cwe: "CWE-943" }
+    languages: [generic]
+    paths: { include: ["*.js", "*.ts", "*.mjs", "*.cjs"] }
+    pattern-either:
+      - pattern-regex: |-
+          \.(find|findOne|findOneAndUpdate|updateOne|updateMany|deleteOne|deleteMany|countDocuments)\(\s*req\.(body|query|params)\s*[,)]
+      - pattern-regex: |-
+          \$where\s*:
+  - id: node-mass-assignment
+    message: Whole request body written to the database. Validate with a schema (zod, joi, class-validator) and pick fields.
+    severity: ERROR
+    metadata: { area: injection, cwe: "CWE-915" }
+    languages: [generic]
+    paths: { include: ["*.js", "*.ts", "*.mjs", "*.cjs"] }
+    pattern-regex: |-
+      \.(create|insert|update|upsert|insertOne|insertMany|save)\(\s*(\{\s*data:\s*)?req\.body\s*\}?\s*[,)]
+  - id: node-command-injection
+    message: Command or code execution with dynamic input. Use execFile with an argument array and an allowlist, never eval.
+    severity: ERROR
+    metadata: { area: injection, cwe: "CWE-78" }
+    languages: [generic]
+    paths: { include: ["*.js", "*.ts", "*.mjs", "*.cjs"] }
+    pattern-either:
+      - pattern-regex: |-
+          \b(exec|execSync|spawn|spawnSync)\(\s*(`[^`]*\$\{|[^)'"`]*\+|req\.)
+      - pattern-regex: |-
+          \b(eval|new Function|vm\.runInNewContext|vm\.runInThisContext)\(
+  - id: node-path-traversal
+    message: File path built from request input. Resolve against a fixed base and reject paths that escape it.
+    severity: ERROR
+    metadata: { area: upload-ssrf, cwe: "CWE-22" }
+    languages: [generic]
+    paths: { include: ["*.js", "*.ts", "*.mjs", "*.cjs"] }
+    pattern-regex: |-
+      (sendFile|download|readFile|readFileSync|createReadStream|unlink|writeFile)\([^)]*req\.(params|query|body)
+  - id: node-ssrf
+    message: Server requests a URL that comes from the user. Validate against a host allowlist and block private ranges.
+    severity: WARNING
+    metadata: { area: upload-ssrf, cwe: "CWE-918" }
+    languages: [generic]
+    paths: { include: ["*.js", "*.ts", "*.mjs", "*.cjs"] }
+    pattern-regex: |-
+      \b(fetch|axios(\.(get|post|request))?|got|http\.get|https\.get|request)\(\s*req\.(body|query|params)
+  - id: node-open-redirect
+    message: Redirect target comes from the user. Allow only relative paths or an allowlist of hosts.
+    severity: WARNING
+    metadata: { area: injection, cwe: "CWE-601" }
+    languages: [generic]
+    paths: { include: ["*.js", "*.ts", "*.mjs", "*.cjs"] }
+    pattern-regex: |-
+      res\.redirect\(\s*req\.(query|body|params)
+  - id: node-xss-response
+    message: Request input sent back as HTML. Escape it or render through a template engine with auto-escaping.
+    severity: WARNING
+    metadata: { area: injection, cwe: "CWE-79" }
+    languages: [generic]
+    paths: { include: ["*.js", "*.ts", "*.mjs", "*.cjs"] }
+    pattern-regex: |-
+      res\.(send|write|end)\(\s*(`[^`]*\$\{\s*req\.|[^)]*\+\s*req\.(query|body|params))
+  - id: react-dangerous-html
+    message: dangerouslySetInnerHTML with data. Sanitize with DOMPurify or render as text.
+    severity: WARNING
+    metadata: { area: injection, cwe: "CWE-79" }
+    languages: [generic]
+    paths: { include: ["*.jsx", "*.tsx", "*.js", "*.ts", "*.vue"] }
+    pattern-either:
+      - pattern-regex: |-
+          dangerouslySetInnerHTML=\{\{\s*__html:\s*(?!DOMPurify)
+      - pattern-regex: |-
+          v-html=
+  - id: node-jwt-weak
+    message: JWT verification weakened. Fix the algorithm list, never decode without verify for auth, never accept "none".
+    severity: ERROR
+    metadata: { area: auth-session, cwe: "CWE-347" }
+    languages: [generic]
+    paths: { include: ["*.js", "*.ts", "*.mjs", "*.cjs"] }
+    pattern-either:
+      - pattern-regex: |-
+          algorithms\s*:\s*\[[^\]]*['"]none['"]
+      - pattern-regex: |-
+          jwt\.decode\([^)]*\)\s*;?\s*\n?.*(user|auth|role)
+      - pattern-regex: |-
+          ignoreExpiration\s*:\s*true
+  - id: node-cors-any
+    message: CORS reflects any origin. List explicit origins, especially with credentials.
+    severity: WARNING
+    metadata: { area: config-secrets, cwe: "CWE-942" }
+    languages: [generic]
+    paths: { include: ["*.js", "*.ts", "*.mjs", "*.cjs"] }
+    pattern-either:
+      - pattern-regex: |-
+          cors\(\s*\{[^}]*origin\s*:\s*(true|['"]\*['"])
+      - pattern-regex: |-
+          Access-Control-Allow-Origin['"]\s*,\s*['"]\*
+  - id: node-weak-crypto
+    message: Weak hashing or randomness for security. Use argon2 or bcrypt for passwords and crypto.randomBytes or randomUUID for tokens.
+    severity: ERROR
+    metadata: { area: auth-session, cwe: "CWE-327" }
+    languages: [generic]
+    paths: { include: ["*.js", "*.ts", "*.mjs", "*.cjs"] }
+    pattern-either:
+      - pattern-regex: |-
+          createHash\(\s*['"](md5|sha1)['"]\s*\)[^;]*(pass|pwd|token)
+      - pattern-regex: |-
+          Math\.random\(\)[^;]*(token|secret|otp|password|reset)
+  - id: express-no-helmet-or-limit
+    message: Express app without helmet or a rate limiter in this file. Add helmet() and express-rate-limit (or equivalents) at app setup.
+    severity: INFO
+    metadata: { area: config-secrets, cwe: "CWE-693" }
+    languages: [generic]
+    paths: { include: ["app.js", "app.ts", "server.js", "server.ts", "index.js", "index.ts", "main.ts"] }
+    patterns:
+      - pattern-regex: |-
+          express\(\)
+      - pattern-not-regex: |-
+          helmet|rateLimit|rate-limit|@nestjs/throttler

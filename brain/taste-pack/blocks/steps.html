@@ -1,0 +1,16 @@
+<section class="section {{#alt}}section--alt{{/alt}}" id="{{id}}">
+  <div class="container">
+    <div class="section__head">
+      <span class="eyebrow">{{eyebrow}}</span>
+      <h2 class="title">{{title}}</h2>
+      {{#lead}}<p class="lead">{{lead}}</p>{{/lead}}
+    </div>
+    <ol class="steps" role="list">
+      {{#items}}<li class="steps__item" data-reveal>
+        <h3 class="steps__title">{{title}}</h3>
+        <p class="steps__text">{{text}}</p>
+      </li>
+      {{/items}}
+    </ol>
+  </div>
+</section>

@@ -1,0 +1,102 @@
+{{> partials/shell-start}}
+<form class="card" data-ui="form" data-draft-key="pegawai-baru" data-demo action="#" method="post">
+  <section class="form-section" aria-labelledby="s-pribadi">
+    <div class="form-section__head">
+      <h2 class="form-section__title" id="s-pribadi">Data pribadi</h2>
+      <p class="form-section__desc">Sesuai dokumen kependudukan. Dipakai untuk pencocokan data dengan SIASN.</p>
+    </div>
+    <div class="form-grid">
+      <div class="field span-2">
+        <label class="field__label" for="f-name"><span data-label-text>Nama lengkap<span class="field__req" aria-hidden="true">*</span></span></label>
+        <input class="input" id="f-name" name="name" type="text" required maxlength="120" autocomplete="name" placeholder="Tanpa gelar">
+      </div>
+      <div class="field">
+        <label class="field__label" for="f-nik"><span data-label-text>NIK<span class="field__req" aria-hidden="true">*</span></span></label>
+        <input class="input" id="f-nik" name="nik" type="text" inputmode="numeric" required pattern="[0-9]{16}" title="NIK terdiri dari 16 digit angka." placeholder="16 digit">
+      </div>
+      <div class="field">
+        <label class="field__label" for="f-birth"><span data-label-text>Tanggal lahir<span class="field__req" aria-hidden="true">*</span></span></label>
+        <input id="f-birth" name="birth_date" type="date" data-ui="date" required min="1955-01-01" max="2008-12-31">
+      </div>
+      <div class="field">
+        <label class="field__label" for="f-email"><span data-label-text>Email kantor<span class="field__req" aria-hidden="true">*</span></span></label>
+        <input class="input" id="f-email" name="email" type="email" required autocomplete="email" placeholder="nama@kantor.go.id">
+      </div>
+      <div class="field">
+        <label class="field__label" for="f-phone"><span data-label-text>Nomor WhatsApp</span><span class="field__opt">opsional</span></label>
+        <div class="input-group"><span class="input-group__addon">+62</span><input class="input" id="f-phone" name="phone" type="tel" inputmode="tel" placeholder="812 3456 7890"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="form-section" aria-labelledby="s-kerja">
+    <div class="form-section__head">
+      <h2 class="form-section__title" id="s-kerja">Kepegawaian</h2>
+      <p class="form-section__desc">Unit kerja dan tanggal mulai tetap terisi saat memakai Simpan dan tambah lagi, agar input massal lebih cepat.</p>
+    </div>
+    <div class="form-grid">
+      <fieldset class="choices span-2">
+        <legend class="field__label choices__legend">Jenis kepegawaian</legend>
+        <label class="choice"><input type="radio" name="type" value="pns" checked><span class="choice__title">PNS</span><span class="choice__desc">Memiliki NIP 18 digit.</span></label>
+        <label class="choice"><input type="radio" name="type" value="pppk"><span class="choice__title">PPPK</span><span class="choice__desc">Dengan masa perjanjian kerja.</span></label>
+        <label class="choice"><input type="radio" name="type" value="non-asn"><span class="choice__title">Non ASN</span><span class="choice__desc">Tenaga pendukung.</span></label>
+      </fieldset>
+      <div class="field">
+        <label class="field__label" for="f-unit"><span data-label-text>Unit kerja<span class="field__req" aria-hidden="true">*</span></span></label>
+        <select id="f-unit" name="unit" data-ui="select" required data-keep data-placeholder="Pilih unit kerja">
+          <option value=""></option>
+          <optgroup label="Sekretariat"><option value="umum">Bagian Umum</option><option value="keuangan">Bagian Keuangan</option><option value="kepegawaian">Bagian Kepegawaian</option></optgroup>
+          <optgroup label="Bidang"><option value="layanan">Bidang Pelayanan</option><option value="data">Bidang Data dan Informasi</option><option value="perencanaan">Bidang Perencanaan</option><option value="pengawasan">Bidang Pengawasan</option></optgroup>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field__label" for="f-start"><span data-label-text>Tanggal mulai tugas<span class="field__req" aria-hidden="true">*</span></span></label>
+        <input id="f-start" name="start_date" type="date" data-ui="date" required>
+      </div>
+      <div class="field span-2">
+        <label class="field__label" for="f-skills"><span data-label-text>Kompetensi</span><span class="field__opt">opsional</span></label>
+        <select id="f-skills" name="skills[]" multiple data-ui="multiselect" data-placeholder="Ketik untuk mencari kompetensi">
+          <option value="pengadaan">Pengadaan barang dan jasa</option><option value="arsip">Kearsipan</option><option value="keuangan">Pengelolaan keuangan</option><option value="ti">Teknologi informasi</option><option value="humas">Kehumasan</option><option value="hukum">Hukum dan perundangan</option><option value="statistik">Statistik</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <section class="form-section" aria-labelledby="s-berkas">
+    <div class="form-section__head">
+      <h2 class="form-section__title" id="s-berkas">Berkas</h2>
+      <p class="form-section__desc">File diperiksa sebelum dikirim. File yang ditolak tidak ikut terunggah.</p>
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <span class="field__label" id="f-photo-label"><span data-label-text>Pas foto<span class="field__req" aria-hidden="true">*</span></span></span>
+        <input id="f-photo" name="photo" type="file" accept="image/jpeg,image/png" data-ui="upload" data-max-mb="2" data-hint="JPG atau PNG, latar merah, maks. 2 MB" required aria-labelledby="f-photo-label">
+      </div>
+      <div class="field">
+        <span class="field__label" id="f-sk-label"><span data-label-text>SK pengangkatan</span><span class="field__opt">opsional</span></span>
+        <input id="f-sk" name="documents[]" type="file" multiple accept=".pdf" data-ui="upload" data-max-mb="5" data-max-files="3" aria-labelledby="f-sk-label">
+      </div>
+    </div>
+  </section>
+
+  <section class="form-section" aria-labelledby="s-akses">
+    <div class="form-section__head">
+      <h2 class="form-section__title" id="s-akses">Akses aplikasi</h2>
+      <p class="form-section__desc">Bisa diubah kapan saja dari halaman profil pegawai.</p>
+    </div>
+    <div class="stack stack--tight">
+      <label class="switch"><input type="checkbox" name="can_login" value="1" checked><span class="switch__track" aria-hidden="true"></span><span class="switch__text">Boleh masuk aplikasi<small>Undangan dikirim ke email kantor</small></span></label>
+      <label class="switch"><input type="checkbox" name="directory" value="1"><span class="switch__track" aria-hidden="true"></span><span class="switch__text">Tampilkan di direktori pegawai<small>Nama, unit, dan email terlihat oleh pegawai lain</small></span></label>
+    </div>
+  </section>
+
+  <div class="form-actions" data-state="idle">
+    <span class="form-actions__status"><span class="form-actions__dot" aria-hidden="true"></span><span class="form-actions__text" aria-live="polite">Draf disimpan otomatis di perangkat ini</span></span>
+    <div class="form-actions__buttons">
+      <a class="btn btn--quiet" href="#">Batal</a>
+      <button class="btn btn--secondary" type="submit" name="intent" value="save_new">Simpan dan tambah lagi</button>
+      <button class="btn btn--primary" type="submit" name="intent" value="save">Simpan pegawai</button>
+    </div>
+  </div>
+</form>
+{{> partials/shell-end}}

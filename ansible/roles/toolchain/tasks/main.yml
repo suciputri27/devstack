@@ -1,0 +1,204 @@
+- name: Folder keyring apt
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
+
+- name: Cek repo PHP ondrej yang sudah terpasang
+  ansible.builtin.command: grep -rqs "ppa.launchpadcontent.net/ondrej/php" /etc/apt/sources.list /etc/apt/sources.list.d/
+  register: ondrej_present
+  changed_when: false
+  failed_when: false
+
+- name: Kunci repo PHP ondrej (tanpa API Launchpad)
+  ansible.builtin.get_url:
+    url: "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x14AA40EC0831756756D7F66C4F4EA0AAE5267A6C"
+    dest: /etc/apt/keyrings/ondrej-php.asc
+    mode: "0644"
+  when: ondrej_present.rc != 0
+
+- name: Repo PHP ondrej
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/ondrej-php.asc] https://ppa.launchpadcontent.net/ondrej/php/ubuntu {{ ansible_distribution_release }} main"
+    filename: ondrej-php
+    state: present
+  when: ondrej_present.rc != 0
+
+- name: PHP dan ekstensi
+  ansible.builtin.apt:
+    name: "{{ php_versions | product(php_extensions) | map('join', '-') | map('regex_replace', '^', 'php') | list }}"
+    state: present
+    update_cache: true
+
+- name: Cek modul inti PHP termuat
+  ansible.builtin.command: "php{{ item }} -m"
+  loop: "{{ php_versions }}"
+  register: php_modules
+  changed_when: false
+  failed_when: false
+
+- name: Pulihkan konfigurasi modul PHP yang pernah dihapus atau rusak
+  ansible.builtin.script:
+    cmd: php-repair.sh {{ item.item }}
+  loop: "{{ php_modules.results }}"
+  loop_control:
+    label: "php{{ item.item }}"
+  when: "'Phar' not in item.stdout or 'PDO' not in item.stdout or 'PHP Warning' in item.stderr"
+  changed_when: true
+
+- name: Pastikan PHP sehat (Phar dan PDO termuat tanpa warning)
+  ansible.builtin.command: "php{{ item }} -m"
+  loop: "{{ php_versions }}"
+  register: php_check
+  changed_when: false
+  failed_when: "'Phar' not in php_check.stdout or 'PDO' not in php_check.stdout or 'PHP Warning' in php_check.stderr"
+
+- name: PHP default
+  community.general.alternatives:
+    name: php
+    path: "/usr/bin/php{{ php_versions | first }}"
+
+- name: Signature installer Composer
+  ansible.builtin.uri:
+    url: https://composer.github.io/installer.sig
+    return_content: true
+  register: composer_sig
+  changed_when: false
+
+- name: Unduh installer Composer (terverifikasi SHA384)
+  ansible.builtin.get_url:
+    url: https://getcomposer.org/installer
+    dest: /tmp/composer-setup.php
+    checksum: "sha384:{{ composer_sig.content | trim }}"
+    mode: "0644"
+    force: true
+  changed_when: false
+
+- name: Pasang Composer
+  ansible.builtin.command: php /tmp/composer-setup.php --quiet --install-dir=/usr/local/bin --filename=composer
+  args:
+    creates: /usr/local/bin/composer
+
+- name: Key repo NodeSource
+  ansible.builtin.get_url:
+    url: https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key
+    dest: /etc/apt/keyrings/nodesource.asc
+    mode: "0644"
+
+- name: Repo NodeSource
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/nodesource.asc] https://deb.nodesource.com/node_{{ node_major }}.x nodistro main"
+    filename: nodesource
+    state: present
+
+- name: Key repo Docker
+  ansible.builtin.get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    mode: "0644"
+
+- name: Repo Docker
+  ansible.builtin.apt_repository:
+    repo: "deb [arch={{ deb_arch }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+    filename: docker
+    state: present
+
+- name: Key repo GitHub CLI
+  ansible.builtin.get_url:
+    url: https://cli.github.com/packages/githubcli-archive-keyring.gpg
+    dest: /etc/apt/keyrings/githubcli-archive-keyring.gpg
+    mode: "0644"
+
+- name: Repo GitHub CLI
+  ansible.builtin.apt_repository:
+    repo: "deb [arch={{ deb_arch }} signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main"
+    filename: github-cli
+    state: present
+
+- name: Node dan GitHub CLI
+  ansible.builtin.apt:
+    name:
+      - nodejs
+      - gh
+    state: present
+    update_cache: true
+
+- name: Tentukan mode Docker (LXC butuh containerd versi khusus)
+  ansible.builtin.set_fact:
+    docker_lxc_pin: >-
+      {{ (ansible_virtualization_type == 'lxc' and ansible_virtualization_role == 'guest')
+         if docker_lxc_pin_setting == 'auto' else (docker_lxc_pin_setting | bool) }}
+
+- name: Docker (VM atau bare metal)
+  ansible.builtin.apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+  when: not docker_lxc_pin
+
+- name: Docker versi yang kompatibel dengan LXC Proxmox (dikunci)
+  ansible.builtin.script:
+    cmd: docker-lxc.sh
+  register: docker_lxc
+  changed_when: "'CHANGED' in docker_lxc.stdout"
+  when: docker_lxc_pin
+
+- name: Buka masker service Docker
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    masked: false
+  loop:
+    - containerd
+    - docker
+
+- name: Docker aktif
+  ansible.builtin.systemd:
+    name: docker
+    enabled: true
+    state: started
+    daemon_reload: true
+
+- name: Uji Docker bisa menjalankan container
+  ansible.builtin.command: docker run --rm hello-world
+  register: docker_hello
+  changed_when: false
+  failed_when: false
+
+- name: Hentikan jika Docker tidak bisa menjalankan container
+  ansible.builtin.fail:
+    msg: |
+      Docker terpasang tetapi gagal menjalankan container:
+      {{ docker_hello.stderr | default('') | trim }}
+      Jika server ini container LXC dan error menyebut ip_unprivileged_port_start,
+      set DOCKER_LXC_PIN=true di .env lalu jalankan ulang installer.
+  when: docker_hello.rc != 0
+
+- name: Program fdfind milik root (perbaikan dari versi installer lama)
+  ansible.builtin.file:
+    path: /usr/bin/fdfind
+    owner: root
+    group: root
+
+- name: Paket npm global (LSP dan uipro)
+  community.general.npm:
+    name: "{{ item }}"
+    global: true
+    state: present
+  loop: "{{ npm_globals }}"
+
+- name: Dependensi sistem Chromium untuk Playwright
+  ansible.builtin.command: npx -y playwright install-deps chromium
+  args:
+    creates: /var/lib/devstack/.playwright-deps
+  when: install_playwright | bool
+
+- name: Penanda dependensi Playwright
+  ansible.builtin.copy:
+    dest: /var/lib/devstack/.playwright-deps
+    content: "ok\n"
+    mode: "0644"
+  when: install_playwright | bool

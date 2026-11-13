@@ -1,0 +1,16 @@
+<section class="section {{#alt}}section--alt{{/alt}}" id="{{id}}">
+  <div class="container faq">
+    <div class="section__head">
+      <span class="eyebrow">{{eyebrow}}</span>
+      <h2 class="title">{{title}}</h2>
+      {{#lead}}<p class="lead">{{lead}}</p>{{/lead}}
+    </div>
+    <div class="faq__list">
+      {{#items}}<details class="faq__item" {{#_first}}open{{/_first}}>
+        <summary class="faq__q">{{q}}<span class="faq__icon" aria-hidden="true"></span></summary>
+        <p class="faq__a">{{a}}</p>
+      </details>
+      {{/items}}
+    </div>
+  </div>
+</section>

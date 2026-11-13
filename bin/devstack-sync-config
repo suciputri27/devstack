@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+[ "$(id -u)" -eq 0 ] || { echo "Jalankan dengan sudo: sudo devstack-sync-config"; exit 1; }
+CONF=/etc/devstack.conf
+[ -r "$CONF" ] || { echo "Tidak menemukan $CONF. Jalankan installer dulu."; exit 2; }
+# shellcheck disable=SC1090
+. "$CONF"
+
+SRC="${DEVSTACK_DEFAULTS:-/opt/devstack/omp-config-defaults}"
+VERSION=$(cat /opt/devstack/VERSION 2>/dev/null || echo "?")
+MANAGED="agent/AGENTS.md agent/BACKEND.md agent/config.yml agent/mcp.json agent/skills agent/agents bin hooks templates install.sh .gitignore"
+dry=false
+[ "${1:-}" = "--dry-run" ] && dry=true
+
+[ -d "$SRC" ] || { echo "Default config tidak ditemukan di $SRC"; exit 2; }
+
+for user in $DEVSTACK_USER ${TEAM_USERS:-}; do
+  home=$(getent passwd "$user" | cut -d: -f6) || continue
+  cfg="$home/omp-config"
+  printf '\n==> %s (%s)\n' "$user" "$cfg"
+  if [ ! -d "$cfg/.git" ]; then
+    echo "  lewati: $cfg bukan repo git"
+    continue
+  fi
+  for item in $MANAGED; do
+    [ -e "$SRC/$item" ] || continue
+    if [ -d "$SRC/$item" ]; then
+      if $dry; then
+        (cd "$SRC/$item" && find . -type f) | while read -r f; do
+          cmp -s "$SRC/$item/$f" "$cfg/$item/$f" || echo "  akan berubah: $item/${f#./}"
+        done
+      else
+        mkdir -p "$cfg/$item"
+        cp -a "$SRC/$item/." "$cfg/$item/"
+      fi
+    else
+      if ! cmp -s "$SRC/$item" "$cfg/$item"; then
+        if $dry; then echo "  akan berubah: $item"; else install -m 0644 "$SRC/$item" "$cfg/$item"; fi
+      fi
+    fi
+  done
+  $dry && continue
+  chown -R "$user:$user" "$cfg"
+  chmod 0755 "$cfg/install.sh" "$cfg/bin/"* "$cfg/hooks/"* 2>/dev/null || true
+  sudo -u "$user" -H bash -c "
+    cd '$cfg'
+    git add -A
+    if git diff --cached --quiet; then
+      echo '  sudah sama dengan devstack $VERSION'
+    else
+      git -c user.name=devstack -c user.email=devstack@localhost commit -q -m 'chore: devstack $VERSION defaults'
+      git show --stat --format='  commit %h %s' HEAD | sed 's/^/  /'
+      echo '  Lihat detail: git -C ~/omp-config show HEAD. Batalkan: git -C ~/omp-config revert HEAD'
+    fi
+    ./install.sh >/dev/null
+  "
+done
+
+$dry || printf '\nSelesai. Di setiap proyek, jalankan ai-init lagi agar hook pre-commit ikut terbarui.\n'

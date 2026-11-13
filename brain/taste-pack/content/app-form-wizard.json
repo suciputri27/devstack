@@ -1,0 +1,23 @@
+{
+  "kind": "app",
+  "preset": "clean-corporate",
+  "lang": "id",
+  "screen": "screens/form-wizard.html",
+  "include_data": [
+    "app-shell.json"
+  ],
+  "title": "Ajukan izin - Sigap",
+  "description": "Form pengajuan izin bertahap",
+  "active": "izin",
+  "page_title": "Ajukan izin",
+  "page_desc": "Empat langkah singkat. Anda bisa kembali ke langkah sebelumnya kapan saja.",
+  "breadcrumb": [
+    {
+      "label": "Pengajuan izin",
+      "href": "#"
+    },
+    {
+      "label": "Ajukan izin"
+    }
+  ]
+}

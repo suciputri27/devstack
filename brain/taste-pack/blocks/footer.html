@@ -1,0 +1,19 @@
+</main>
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__about">
+        <a class="nav__brand" href="#top"><span class="nav__mark" aria-hidden="true">{{mark}}</span>{{brand}}</a>
+        <p class="footer__tagline">{{tagline}}</p>
+      </div>
+      <div class="footer__cols">
+        {{#columns}}<nav aria-label="{{heading}}">
+          <h2 class="footer__heading">{{heading}}</h2>
+          <ul class="footer__links">{{#links}}<li><a href="{{href}}">{{label}}</a></li>{{/links}}</ul>
+        </nav>
+        {{/columns}}
+      </div>
+    </div>
+    <div class="footer__bottom"><span>{{copyright}}</span><span>{{note}}</span></div>
+  </div>
+</footer>

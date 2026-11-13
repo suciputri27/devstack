@@ -1,0 +1,470 @@
+{
+  "preset": "bold-tech",
+  "lang": "id",
+  "title": "devstack: AI coding yang patuh standar",
+  "description": "Agent coding, gerbang kualitas, dan aturan tim di satu server. Kode aman dan tampilan yang tidak generik, bahkan dengan model murah.",
+  "globals": {
+    "brand": "devstack",
+    "mark": "ds"
+  },
+  "blocks": [
+    {
+      "type": "nav",
+      "skip_label": "Lewati ke konten",
+      "menu_label": "Menu utama",
+      "links": [
+        {
+          "label": "Fitur",
+          "href": "#fitur"
+        },
+        {
+          "label": "Cara kerja",
+          "href": "#cara-kerja"
+        },
+        {
+          "label": "Stack",
+          "href": "#stack"
+        },
+        {
+          "label": "Harga",
+          "href": "#harga"
+        },
+        {
+          "label": "FAQ",
+          "href": "#faq"
+        }
+      ],
+      "cta_label": "Jadwalkan demo",
+      "cta_href": "#mulai"
+    },
+    {
+      "type": "hero-terminal",
+      "badge": "v0.5 dengan Taste Pack dan Claim Verifier",
+      "title": "AI coding yang *patuh standar*, bukan sekadar cepat.",
+      "lead": "devstack memasang agent, gerbang kualitas, dan aturan tim Anda di satu tempat. Model murah pun menghasilkan kode yang aman dan tampilan yang tidak terlihat buatan AI.",
+      "primary_label": "Jadwalkan demo",
+      "primary_href": "#mulai",
+      "secondary_label": "Lihat cara kerja",
+      "secondary_href": "#cara-kerja",
+      "proof": [
+        "Laravel dan CodeIgniter 3",
+        "Jalan di server Anda sendiri",
+        "Tanpa vendor lock-in model"
+      ],
+      "terminal_label": "Contoh sesi devstack: inisialisasi proyek, membuat halaman, gate kualitas, dan commit terverifikasi",
+      "terminal_name": "devbox: ~/projects/toko",
+      "lines": [
+        {
+          "kind": "cmd",
+          "text": "ai-init"
+        },
+        {
+          "kind": "ok",
+          "text": "AGENTS.md, DESIGN.md, hook, dan taste pack terpasang"
+        },
+        {
+          "kind": "cmd",
+          "text": "omp \"buat halaman harga dengan toggle tahunan\""
+        },
+        {
+          "kind": "dim",
+          "text": "Class: MEDIUM | Mode: STANDARD | Stack: Laravel 12"
+        },
+        {
+          "kind": "dim",
+          "text": "assemble: ok 6 blok, preset bold-tech"
+        },
+        {
+          "kind": "ok",
+          "text": "gate: kontras ok, overflow ok, console bersih"
+        },
+        {
+          "kind": "warn",
+          "text": "security: query tanpa binding di OrderRepository"
+        },
+        {
+          "kind": "ok",
+          "text": "diperbaiki. semgrep ok, phpstan ok"
+        },
+        {
+          "kind": "cmd",
+          "text": "git commit -m \"feat: pricing page\""
+        },
+        {
+          "kind": "ok",
+          "text": "claim verifier: commit a1b9c3e benar-benar ada"
+        }
+      ]
+    },
+    {
+      "type": "logos",
+      "label": "Dirancang untuk stack yang dipakai tim di Indonesia",
+      "names": [
+        "Laravel",
+        "CodeIgniter 3",
+        "PostgreSQL",
+        "MySQL",
+        "jQuery",
+        "Alpine.js",
+        "Docker",
+        "GitLab",
+        "GitHub",
+        "Proxmox"
+      ]
+    },
+    {
+      "type": "bento",
+      "id": "fitur",
+      "eyebrow": "Fitur",
+      "title": "Kualitas datang dari *proses*, bukan dari harga model.",
+      "lead": "Selera visual, struktur kode, dan pemeriksaan dipindah ke aset dan skrip. Model cukup mengerjakan bagian yang memang butuh berpikir.",
+      "items": [
+        {
+          "size": "wide",
+          "kicker": "13 blok",
+          "title": "Taste Pack",
+          "text": "Preset visual dan blok halaman buatan tangan. Agent merakit dari bahan yang sudah bagus, bukan menebak warna dari nol.",
+          "tag": "frontend"
+        },
+        {
+          "size": "tall",
+          "title": "Claim Verifier",
+          "text": "Agent tidak bisa mengaku sudah commit, sudah tes, atau sudah membuat file. Setiap klaim dicek ke kenyataan sebelum dilaporkan.",
+          "tag": "kejujuran",
+          "log": [
+            {
+              "state": "ok",
+              "state_label": "ok",
+              "text": "file public/pricing.html ada"
+            },
+            {
+              "state": "ok",
+              "state_label": "ok",
+              "text": "php -l: 0 error"
+            },
+            {
+              "state": "fail",
+              "state_label": "ditolak",
+              "text": "klaim \"tes lulus\" tanpa output"
+            },
+            {
+              "state": "ok",
+              "state_label": "ok",
+              "text": "commit a1b9c3e ada di git log"
+            }
+          ]
+        },
+        {
+          "size": "normal",
+          "icon": "{}",
+          "title": "Gate deterministik",
+          "text": "Kontras, overflow, Semgrep, PHPStan, dan audit dependensi. Senyap kalau lulus, rinci kalau gagal.",
+          "tag": "kualitas"
+        },
+        {
+          "size": "normal",
+          "icon": "S M L",
+          "title": "Task Router",
+          "text": "Bug kecil tidak perlu rapat. Tugas besar tidak boleh asal jalan. Prosesnya menyesuaikan ukuran tugas.",
+          "tag": "kecepatan"
+        },
+        {
+          "size": "normal",
+          "icon": "+1",
+          "title": "Lessons memory",
+          "text": "Setiap koreksi Anda saat review disimpan per proyek, sehingga kesalahan yang sama tidak muncul lagi di sesi berikutnya.",
+          "tag": "belajar"
+        },
+        {
+          "size": "wide",
+          "icon": "id",
+          "title": "Aman sejak baris pertama",
+          "text": "UUID di semua permukaan publik, parameter binding, CSRF, Argon2id, dan enkripsi AES-256-GCM sudah jadi aturan wajib, bukan saran.",
+          "tag": "keamanan"
+        }
+      ]
+    },
+    {
+      "type": "steps",
+      "id": "cara-kerja",
+      "alt": true,
+      "eyebrow": "Cara kerja",
+      "title": "Dari repo kosong ke PR yang siap direview.",
+      "items": [
+        {
+          "title": "Pasang sekali",
+          "text": "Installer menyiapkan server, 9Router, agent, dan pengaman SSH dalam satu kali jalan."
+        },
+        {
+          "title": "Siapkan proyek",
+          "text": "ai-init memindai gaya kode dan memasang aturan, desain, serta hook di repo."
+        },
+        {
+          "title": "Beri tugas",
+          "text": "Tulis kebutuhan dengan bahasa biasa. Router memilih alur, skill, dan anggaran waktunya."
+        },
+        {
+          "title": "Review dan kirim",
+          "text": "Baca diff, cek tampilan, lalu push. Push selalu menunggu izin Anda."
+        }
+      ]
+    },
+    {
+      "type": "feature-tabs",
+      "id": "stack",
+      "eyebrow": "Stack",
+      "title": "Paham proyek lama, rapi di proyek baru.",
+      "lead": "Mirror mode meniru gaya kode yang sudah ada. Standard mode memakai clean architecture lengkap.",
+      "items": [
+        {
+          "label": "Laravel",
+          "title": "Repository pattern tanpa ditulis manual",
+          "text": "Generator membuat interface, repository, service, FormRequest, dan policy. Agent hanya mengisi logika bisnis.",
+          "points": [
+            "UUIDv7 dan route binding otomatis",
+            "Policy di setiap endpoint",
+            "Pint dan PHPStan di gate"
+          ],
+          "file": "app/Infrastructure/OrderRepository.php",
+          "status": "phpstan ok",
+          "code": "final class EloquentOrderRepository implements OrderRepository\n{\n    public function findForOwner(string $uuid, User $owner): ?Order\n    {\n        return Order::query()\n            ->whereKey($uuid)\n            ->whereBelongsTo($owner)\n            ->first();\n    }\n}"
+        },
+        {
+          "label": "CodeIgniter 3",
+          "title": "Mirror mode untuk kode yang sudah berjalan",
+          "text": "Agent membaca style fingerprint proyek lalu mengikuti pola Query Builder, view, dan penamaan yang ada.",
+          "points": [
+            "Tanpa refactor di luar tugas",
+            "public_id untuk tabel lama",
+            "Cek kepemilikan di setiap aksi"
+          ],
+          "file": "application/models/Order_model.php",
+          "status": "php -l ok",
+          "code": "public function find_for_owner($public_id, $owner_id)\n{\n    $sql = 'SELECT o.public_id, o.total FROM orders o\n            WHERE o.public_id = ? AND o.owner_id = ?';\n    return $this->db->query($sql, [$public_id, $owner_id])->row();\n}"
+        },
+        {
+          "label": "Frontend",
+          "title": "Dirakit dari blok, dicek oleh skrip",
+          "text": "Halaman dibangun dari preset dan blok Taste Pack, lalu diperiksa kontras, overflow, dan error console di tiga ukuran layar.",
+          "points": [
+            "Token warna lolos WCAG AA",
+            "Interaksi menghormati reduced motion",
+            "Ajax dengan CSRF dan state loading"
+          ],
+          "file": "content/pricing.json",
+          "status": "assemble ok",
+          "code": "{\n  \"preset\": \"bold-tech\",\n  \"blocks\": [\n    { \"type\": \"nav\" },\n    { \"type\": \"pricing\", \"plans\": [] },\n    { \"type\": \"faq\" }\n  ]\n}"
+        }
+      ]
+    },
+    {
+      "type": "stats",
+      "id": "angka",
+      "title": "Hemat token karena tidak mengulang yang sudah pasti.",
+      "lead": "Instruksi stabil di-cache, boilerplate dibuat skrip, dan output gate hanya satu baris saat lulus.",
+      "items": [
+        {
+          "value": "92",
+          "suffix": "%",
+          "label": "input token ter-cache di sesi uji"
+        },
+        {
+          "value": "6",
+          "label": "combo model dengan fallback"
+        },
+        {
+          "value": "2",
+          "label": "kali percobaan perbaikan sebelum agent wajib lapor"
+        },
+        {
+          "value": "0",
+          "label": "secret yang boleh masuk repo"
+        }
+      ],
+      "note": "Angka cache diambil dari dashboard 9Router pada sesi uji 13 November 2026."
+    },
+    {
+      "type": "testimonials",
+      "id": "cerita",
+      "alt": true,
+      "eyebrow": "Contoh testimoni",
+      "title": "Yang kami dengar dari tim pengguna awal.",
+      "items": [
+        {
+          "featured": true,
+          "quote": "Dulu agent kami sering bilang sudah selesai padahal tesnya belum jalan. Sekarang laporannya bisa dipercaya karena setiap klaim dicek.",
+          "name": "Contoh: Lead Developer",
+          "role": "Software house, 8 developer",
+          "initials": "LD"
+        },
+        {
+          "quote": "Proyek CodeIgniter lama kami tidak dirombak. Agent ikut gaya yang ada, dan itu yang paling penting.",
+          "name": "Contoh: Backend Engineer",
+          "role": "Tim IT internal",
+          "initials": "BE"
+        },
+        {
+          "quote": "Landing page pertama kami tidak lagi terlihat seperti template AI.",
+          "name": "Contoh: Product Owner",
+          "role": "Startup tahap awal",
+          "initials": "PO"
+        }
+      ]
+    },
+    {
+      "type": "pricing",
+      "id": "harga",
+      "eyebrow": "Harga",
+      "title": "Bayar untuk hasil, bukan untuk server.",
+      "lead": "Harga di bawah adalah contoh. Biaya model dibayar langsung ke provider pilihan Anda.",
+      "switch_label": "Periode tagihan",
+      "monthly_label": "Bulanan",
+      "yearly_label": "Tahunan",
+      "yearly_save": "hemat 2 bulan",
+      "plans": [
+        {
+          "name": "Laptop",
+          "desc": "Untuk developer solo yang ingin proses yang sama di laptop.",
+          "monthly": "Rp149rb",
+          "yearly": "Rp1,49jt",
+          "monthly_period": "per bulan",
+          "yearly_period": "per tahun",
+          "features": [
+            "Taste Pack dan pembaruan",
+            "Aturan, gate, dan hook",
+            "Template Laravel dan CI3"
+          ],
+          "cta_label": "Mulai",
+          "cta_href": "#mulai"
+        },
+        {
+          "featured": true,
+          "flag": "Paling dipilih",
+          "name": "Tim",
+          "desc": "Server bersama untuk 3 sampai 20 developer.",
+          "monthly": "Rp1,9jt",
+          "yearly": "Rp19jt",
+          "monthly_period": "per bulan",
+          "yearly_period": "per tahun",
+          "features": [
+            "Semua di paket Laptop",
+            "9Router bersama dan kontrol biaya",
+            "Setup server dan onboarding",
+            "Run receipt per tugas"
+          ],
+          "cta_label": "Jadwalkan demo",
+          "cta_href": "#mulai"
+        },
+        {
+          "name": "Instansi",
+          "desc": "Untuk organisasi dengan kebutuhan audit dan jaringan tertutup.",
+          "monthly": "Hubungi",
+          "yearly": "Hubungi",
+          "monthly_period": "harga khusus",
+          "yearly_period": "harga khusus",
+          "features": [
+            "Instalasi di jaringan Anda",
+            "Aturan keamanan khusus",
+            "Pendampingan bulanan"
+          ],
+          "cta_label": "Bicara dengan kami",
+          "cta_href": "#mulai"
+        }
+      ]
+    },
+    {
+      "type": "faq",
+      "id": "faq",
+      "eyebrow": "FAQ",
+      "title": "Pertanyaan yang sering muncul.",
+      "lead": "Tidak ada jawabannya di sini? Tanyakan saat demo.",
+      "items": [
+        {
+          "q": "Apakah harus memakai model mahal?",
+          "a": "Tidak. devstack dirancang agar model menengah menghasilkan kode yang memenuhi standar, karena kualitas dijaga oleh aset, generator, dan gate."
+        },
+        {
+          "q": "Apakah kode saya dikirim ke pihak ketiga?",
+          "a": "Kode berada di server Anda. Yang dikirim ke provider model hanya konteks yang dibutuhkan untuk tugas, lewat 9Router yang Anda kendalikan."
+        },
+        {
+          "q": "Bisa dipakai di proyek CodeIgniter 3 yang sudah lama?",
+          "a": "Bisa. Mirror mode membaca gaya proyek lebih dulu dan melarang refactor di luar tugas."
+        },
+        {
+          "q": "Apakah wajib memakai server?",
+          "a": "Tidak. Developer solo bisa memakai paket Laptop. Server bernilai untuk tim yang butuh konfigurasi, biaya, dan keamanan terpusat."
+        }
+      ]
+    },
+    {
+      "type": "cta",
+      "id": "mulai",
+      "title": "Biarkan agent bekerja *sesuai standar Anda*.",
+      "text": "Demo 30 menit di proyek Anda sendiri. Kami tunjukkan task router, gate, dan Taste Pack bekerja langsung.",
+      "primary_label": "Jadwalkan demo",
+      "primary_href": "mailto:halo@contoh.id",
+      "secondary_label": "Baca dokumentasi",
+      "secondary_href": "#fitur"
+    },
+    {
+      "type": "footer",
+      "tagline": "AI coding yang patuh standar, untuk tim PHP dan JavaScript di Indonesia.",
+      "columns": [
+        {
+          "heading": "Produk",
+          "links": [
+            {
+              "label": "Fitur",
+              "href": "#fitur"
+            },
+            {
+              "label": "Harga",
+              "href": "#harga"
+            },
+            {
+              "label": "Cara kerja",
+              "href": "#cara-kerja"
+            }
+          ]
+        },
+        {
+          "heading": "Sumber",
+          "links": [
+            {
+              "label": "Dokumentasi",
+              "href": "#"
+            },
+            {
+              "label": "Changelog",
+              "href": "#"
+            },
+            {
+              "label": "Status",
+              "href": "#"
+            }
+          ]
+        },
+        {
+          "heading": "Perusahaan",
+          "links": [
+            {
+              "label": "Tentang",
+              "href": "#"
+            },
+            {
+              "label": "Kontak",
+              "href": "mailto:halo@contoh.id"
+            },
+            {
+              "label": "Privasi",
+              "href": "#"
+            }
+          ]
+        }
+      ],
+      "copyright": "© 2026 devstack",
+      "note": "Dibuat di Indonesia"
+    }
+  ]
+}

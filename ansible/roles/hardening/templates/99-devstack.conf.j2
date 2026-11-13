@@ -1,0 +1,10 @@
+# Dikelola devstack. Perubahan manual akan ditimpa.
+PermitRootLogin no
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PubkeyAuthentication yes
+AllowUsers {{ ws_users | map(attribute='name') | join(' ') }}
+MaxAuthTries 3
+X11Forwarding no
+ClientAliveInterval 60
+ClientAliveCountMax 3

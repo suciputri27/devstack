@@ -1,0 +1,8 @@
+{% if enable_searxng | bool %}
+searxng:
+  endpoint: http://{{ server_ip }}:{{ searxng_port }}
+providers:
+  webSearchOrder: [searxng]
+{% else %}
+{}
+{% endif %}

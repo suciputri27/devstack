@@ -1,0 +1,30 @@
+rules:
+  - id: blade-unescaped-output
+    message: Unescaped Blade output of a variable. Use {{ }} or sanitize with an allowlist (HTMLPurifier) and document why.
+    severity: WARNING
+    metadata: { area: injection, cwe: "CWE-79" }
+    languages: [generic]
+    paths: { include: ["*.blade.php"] }
+    pattern-regex: |-
+      \{!!\s*\$
+  - id: js-dom-xss
+    message: HTML built from a variable. Use textContent or create elements; never innerHTML with data.
+    severity: WARNING
+    metadata: { area: injection, cwe: "CWE-79" }
+    languages: [generic]
+    paths: { include: ["*.js", "*.blade.php", "*.php", "*.html"] }
+    pattern-either:
+      - pattern-regex: |-
+          \.innerHTML\s*\+?=\s*(?!['"`]\s*['"`])[^;]*(\$\{|\+\s*[a-zA-Z_$])
+      - pattern-regex: |-
+          (\.html\(\s*[a-zA-Z_$][\w.$\[\]]*\s*\)|\$\([^)]*\)\.(append|prepend|after|before)\(\s*[a-zA-Z_$][\w.$\[\]]*\s*\))
+      - pattern-regex: |-
+          document\.write\(
+  - id: js-secret-in-client
+    message: Secret-looking value in client code. Keys must stay on the server.
+    severity: ERROR
+    metadata: { area: config-secrets, cwe: "CWE-798" }
+    languages: [generic]
+    paths: { include: ["*.js", "*.blade.php", "*.html"] }
+    pattern-regex: |-
+      (?i)(api[_-]?key|secret|token|password)\w*\s*[:=]\s*['"][A-Za-z0-9_\-]{16,}['"]

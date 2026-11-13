@@ -1,0 +1,26 @@
+{
+  "app_name": "Sigap",
+  "mark": "S",
+  "search_placeholder": "Cari pegawai, berkas, atau menu",
+  "user_name": "Rina Kartika",
+  "user_role": "Admin kepegawaian",
+  "user_initials": "RK",
+  "nav": [
+    {
+      "heading": "Utama",
+      "links": [
+        { "key": "dashboard", "label": "Dashboard", "href": "#" },
+        { "key": "pegawai", "label": "Pegawai", "href": "form-sectioned.html", "count": "248" },
+        { "key": "izin", "label": "Pengajuan izin", "href": "form-wizard.html", "count": "6" }
+      ]
+    },
+    {
+      "heading": "Sistem",
+      "links": [
+        { "key": "komponen", "label": "Galeri komponen", "href": "gallery.html" },
+        { "key": "laporan", "label": "Laporan", "href": "#" },
+        { "key": "pengaturan", "label": "Pengaturan", "href": "#" }
+      ]
+    }
+  ]
+}

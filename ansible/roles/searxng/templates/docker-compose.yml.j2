@@ -1,0 +1,16 @@
+services:
+  searxng:
+    image: {{ searxng_image }}:{{ searxng_tag }}
+    container_name: searxng
+    restart: unless-stopped
+    ports:
+      - "{{ server_ip }}:{{ searxng_port }}:8080"
+    volumes:
+      - ./config:/etc/searxng:rw
+    environment:
+      SEARXNG_BASE_URL: "http://{{ server_ip }}:{{ searxng_port }}/"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

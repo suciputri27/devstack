@@ -1,0 +1,17 @@
+<section class="statement" id="top">
+  <div class="container statement__grid">
+    <div class="statement__copy">
+      {{#eyebrow}}<span class="eyebrow" data-reveal>{{eyebrow}}</span>{{/eyebrow}}
+      <h1 class="statement__title" data-reveal>{{title}}</h1>
+      <p class="lead" data-reveal>{{lead}}</p>
+      <div class="hero__actions" data-reveal>
+        <a class="btn btn--primary" href="{{primary_href}}" data-magnetic>{{primary_label}} <span class="btn__arrow" aria-hidden="true">&rarr;</span></a>
+        {{#secondary_label}}<a class="btn btn--ghost" href="{{secondary_href}}">{{secondary_label}}</a>{{/secondary_label}}
+      </div>
+    </div>
+    <dl class="facts">
+      {{#facts}}<div class="facts__item" data-reveal><dt class="facts__value">{{value}}</dt><dd class="facts__label">{{label}}</dd></div>
+      {{/facts}}
+    </dl>
+  </div>
+</section>

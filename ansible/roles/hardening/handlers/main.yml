@@ -1,0 +1,3 @@
+- name: Reload ssh
+  ansible.builtin.command: systemctl try-reload-or-restart ssh  # noqa: command-instead-of-module
+  changed_when: true

@@ -1,0 +1,9 @@
+- name: Siapkan workspace setiap pengguna
+  ansible.builtin.include_tasks: user.yml
+  loop: "{{ ws_users }}"
+  loop_control:
+    loop_var: wu
+    label: "{{ wu.name }}"
+  vars:
+    wu_home: "/home/{{ wu.name }}"
+    wu_cfg: "/home/{{ wu.name }}/omp-config"

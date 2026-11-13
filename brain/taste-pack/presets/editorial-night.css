@@ -1,0 +1,38 @@
+:root {
+  --bg: oklch(0.18 0.01 60);
+  --bg-2: oklch(0.205 0.012 60);
+  --surface: oklch(0.225 0.014 60);
+  --surface-2: oklch(0.26 0.016 60);
+  --ink: oklch(0.95 0.012 85);
+  --ink-2: oklch(0.8 0.015 80);
+  --ink-3: oklch(0.69 0.015 80);
+  --line: oklch(0.95 0.012 85 / 0.1);
+  --line-strong: oklch(0.95 0.012 85 / 0.2);
+  --accent: oklch(0.83 0.13 80);
+  --on-accent: oklch(0.2 0.03 70);
+  --accent-soft: oklch(0.83 0.13 80 / 0.12);
+  --accent-2: oklch(0.72 0.12 30);
+  --focus: oklch(0.83 0.13 80);
+  --danger: oklch(0.72 0.16 25);
+  --success: oklch(0.8 0.14 150);
+  --warning: oklch(0.83 0.13 80);
+  --on-danger: oklch(0.18 0.04 25);
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Code", monospace;
+  --display-weight: 560;
+  --display-tracking: -0.02em;
+  --display-leading: 1.05;
+  --radius-s: 4px;
+  --radius-m: 8px;
+  --radius-l: 14px;
+  --radius-pill: 999px;
+  --shadow-1: 0 1px 0 oklch(1 0 0 / 0.05) inset, 0 8px 24px oklch(0 0 0 / 0.35);
+  --shadow-2: 0 1px 0 oklch(1 0 0 / 0.06) inset, 0 24px 60px oklch(0 0 0 / 0.5);
+  --hero-pattern: linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  --hero-pattern-size: 20% 100%;
+  --hero-glow: radial-gradient(55% 50% at 80% 10%, oklch(0.83 0.13 80 / 0.12), transparent 70%);
+  --ease: cubic-bezier(0.25, 0.6, 0.3, 1);
+  --dur: 700ms;
+  color-scheme: dark;
+}

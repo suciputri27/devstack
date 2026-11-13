@@ -1,0 +1,7 @@
+<section class="logos" aria-label="{{label}}">
+  <p class="logos__label">{{label}}</p>
+  <div class="marquee">
+    <ul class="marquee__track" role="list">{{#names}}<li class="marquee__item">{{.}}</li>{{/names}}</ul>
+    <ul class="marquee__track" role="list" aria-hidden="true">{{#names}}<li class="marquee__item">{{.}}</li>{{/names}}</ul>
+  </div>
+</section>
