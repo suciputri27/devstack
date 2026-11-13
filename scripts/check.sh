@@ -39,8 +39,8 @@ python3 brain/taste-pack/tools/contrast.py >/dev/null || fail=1
 
 if command -v semgrep >/dev/null; then
   step "Aturan keamanan menangkap contoh rentan"
-  php=$(semgrep --config brain/audit/semgrep --metrics=off --json --quiet brain/audit/tests/vulnerable | python3 -c 'import json,sys; print(len(json.load(sys.stdin)["results"]))')
-  node=$(semgrep --config brain/audit/semgrep --metrics=off --json --quiet brain/audit/tests/vulnerable-node | python3 -c 'import json,sys; print(len(json.load(sys.stdin)["results"]))')
+  php=$(semgrep --config brain/audit/semgrep --metrics=off --json --quiet brain/audit/fixtures/vulnerable | python3 -c 'import json,sys; print(len(json.load(sys.stdin)["results"]))')
+  node=$(semgrep --config brain/audit/semgrep --metrics=off --json --quiet brain/audit/fixtures/vulnerable-node | python3 -c 'import json,sys; print(len(json.load(sys.stdin)["results"]))')
   echo "  PHP $php temuan (minimal 20), Node $node temuan (minimal 12)"
   [ "$php" -ge 20 ] && [ "$node" -ge 12 ] || fail=1
 fi

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.1
+
+- Perbaikan CI: contoh kode rentan dipindah ke `brain/audit/fixtures/` karena Semgrep melewati folder `tests/` secara bawaan di dalam repo Git.
+- GitHub Actions memakai `actions/checkout@v5` dan `actions/setup-python@v6`.
+
 ## 0.6.0
 
 - Installer baru: wizard setup (IP, subnet, VPN, user, key SSH, identitas Git terdeteksi otomatis), progres per tahap dengan durasi, log lengkap di `/var/log/devstack/`.

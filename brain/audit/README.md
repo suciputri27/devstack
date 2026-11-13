@@ -30,7 +30,7 @@ Kode keluar `1` kalau ada temuan ERROR, jadi bisa dipakai di pre-commit atau CI 
 | `skills/security-audit/` | Alur fase 2: keamanan, mode quick atau full, brief subagent, verifikasi, rubrik severity, format laporan, aturan perbaikan |
 | `areas/` | Checklist 6 area: authz-idor, injection, auth-session, upload-ssrf, business-logic, config-secrets |
 | `agents/` | Subagent `security-auditor` dan `security-verifier` |
-| `tests/` | Contoh kode rentan PHP (20 celah) dan Node (12 celah), semua tertangkap tanpa salah tandai di kode aman |
+| `fixtures/` | Contoh kode rentan PHP (20 celah) dan Node (12 celah), semua tertangkap tanpa salah tandai di kode aman |
 
 Guard dari pelajaran proyek (`.ai/rules/*.yml`, dibuat `lessons guard`) ikut dijalankan otomatis.
 
